@@ -9,129 +9,29 @@
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
 <style>
-:root{
---bg:#0f0f15;
---surface:#1a1a24;
---accent:#ff003c;
---text:#ffffff;
---muted:#aaa;
-}
-*{box-sizing:border-box}
-body{
-margin:0;
-font-family:'Poppins',sans-serif;
-background:var(--bg);
-color:var(--text);
-}
-
-/* BLOCK */
-#blocked{
-display:flex;
-height:100vh;
-justify-content:center;
-align-items:center;
-flex-direction:column;
-background:#000;
-}
-#blocked h1{color:var(--accent);}
-
-/* HEADER */
-header{
-display:flex;
-justify-content:space-between;
-align-items:center;
-padding:15px 5%;
-background:#111;
-position:sticky;
-top:0;
-z-index:10;
-}
-header h1{
-margin:0;
-color:var(--accent);
-}
-header button{
-background:none;
-border:1px solid #444;
-color:#fff;
-padding:6px 12px;
-cursor:pointer;
-}
-
-/* HERO */
-.hero{
-height:50vh;
-background-size:cover;
-background-position:center;
-display:flex;
-align-items:flex-end;
-padding:30px 5%;
-}
-.hero-content h2{
-margin:0 0 10px;
-}
-.hero-content button{
-background:var(--accent);
-border:none;
-padding:10px 15px;
-color:#fff;
-cursor:pointer;
-}
-
-/* SECTION */
+body{margin:0;font-family:Poppins;background:#0f0f15;color:#fff}
+header{display:flex;justify-content:space-between;align-items:center;padding:15px 5%;background:#111}
+header h1{color:#ff003c;margin:0}
+header button{background:none;border:1px solid #444;color:#fff;padding:6px 12px;cursor:pointer}
+#blocked{display:flex;height:100vh;justify-content:center;align-items:center;flex-direction:column;background:#000}
+.hero{height:50vh;background-size:cover;background-position:center;display:flex;align-items:flex-end;padding:30px 5%}
 .section{padding:25px 5%}
-.row{
-display:flex;
-gap:15px;
-overflow-x:auto;
-}
-.card{
-min-width:160px;
-background:var(--surface);
-border-radius:8px;
-cursor:pointer;
-overflow:hidden;
-}
-.card img{
-width:100%;
-height:220px;
-object-fit:cover;
-}
-.card p{
-margin:0;
-padding:8px;
-font-size:14px;
-}
-
-/* PLAYER */
+.row{display:flex;gap:15px;overflow-x:auto}
+.card{min-width:160px;background:#1a1a24;border-radius:8px;cursor:pointer;overflow:hidden}
+.card img{width:100%;height:220px;object-fit:cover}
+.card p{margin:0;padding:8px;font-size:14px}
 #playerPage{display:none;padding:20px 5%}
-video{
-width:100%;
-max-height:70vh;
-background:black;
-}
-.episode-list{
-display:flex;
-flex-wrap:wrap;
-gap:8px;
-margin-top:15px;
-}
-.episode{
-padding:8px 12px;
-background:#222;
-cursor:pointer;
-border-radius:4px;
-}
-.episode.active{
-background:var(--accent);
-}
+video{width:100%;max-height:70vh;background:black}
+.episode-list{display:flex;flex-wrap:wrap;gap:8px;margin-top:15px}
+.episode{padding:8px 12px;background:#222;cursor:pointer;border-radius:4px}
+.episode.active{background:#ff003c}
 </style>
 </head>
 
 <body>
 
 <div id="blocked">
-<h1>Access Denied</h1>
+<h1 style="color:#ff003c">Access Denied</h1>
 <p>Gunakan link khas untuk masuk.</p>
 </div>
 
@@ -146,7 +46,6 @@ background:var(--accent);
 </header>
 
 <div id="hero" class="hero"></div>
-
 <div id="homepage"></div>
 
 <div id="playerPage">
@@ -174,17 +73,24 @@ loadHome();
 document.getElementById("blocked").style.display="flex";
 }
 
-/* API */
+function buildUrl(endpoint){
+if(endpoint.includes("?")){
+return `https://captain.sapimu.au${endpoint}&lang=in`;
+}else{
+return `https://captain.sapimu.au${endpoint}?lang=in`;
+}
+}
+
 async function apiCall(endpoint){
-const target=`https://captain.sapimu.au${endpoint}&lang=in`;
+const target=buildUrl(endpoint);
 const res=await fetch(`${apiBase}?url=${encodeURIComponent(target)}`);
 return await res.json();
 }
 
-/* HOME */
 async function loadHome(){
-const container=document.getElementById("homepage");
-container.innerHTML="";
+const homepage=document.getElementById("homepage");
+homepage.style.display="block";
+homepage.innerHTML="";
 document.getElementById("playerPage").style.display="none";
 document.getElementById("hero").style.display="flex";
 
@@ -205,18 +111,14 @@ setHero(res.data.list[0]);
 }
 }
 
-/* HERO */
 function setHero(item){
 const hero=document.getElementById("hero");
 hero.style.backgroundImage=`url(${item.cover})`;
-hero.innerHTML=`
-<div class="hero-content">
-<h2>${item.bookName}</h2>
+hero.innerHTML=`<div><h2>${item.bookName}</h2>
 <button onclick="openDetails(${item.bookId},'${item.bookName.replace(/'/g,"")}')">Tonton Sekarang</button>
 </div>`;
 }
 
-/* SECTION */
 function createSection(title,data){
 const section=document.createElement("div");
 section.className="section";
@@ -234,14 +136,13 @@ row.appendChild(card);
 document.getElementById("homepage").appendChild(section);
 }
 
-/* DETAILS */
 async function openDetails(bookId,title){
 document.getElementById("homepage").style.display="none";
 document.getElementById("hero").style.display="none";
 document.getElementById("playerPage").style.display="block";
 document.getElementById("videoTitle").textContent=title;
 
-const res=await apiCall(`/dramabox/api/v1/chapters/${bookId}?pageSize=500`);
+const res=await apiCall(`/dramabox/api/v1/chapters/${bookId}`);
 const episodes=res?.data?.chapterList||[];
 
 const list=document.getElementById("episodeList");
@@ -258,7 +159,6 @@ list.appendChild(div);
 if(episodes.length>0) playVideo(bookId,0,list.children[0]);
 }
 
-/* VIDEO */
 let hls;
 async function playVideo(bookId,index,element){
 const res=await apiCall(`/dramabox/api/v1/watch/${bookId}/${index}`);
@@ -277,27 +177,21 @@ hls=new Hls();
 hls.loadSource(url);
 hls.attachMedia(video);
 hls.on(Hls.Events.MANIFEST_PARSED,function(){video.play();});
-}else if(video.canPlayType("application/vnd.apple.mpegurl")){
+}else{
 video.src=url;
-video.addEventListener("loadedmetadata",()=>video.play());
+video.play();
 }
 
-/* AUTOPLAY NEXT */
 video.onended=function(){
 const next=index+1;
-const nextBtn=document.querySelector(`[onclick*=",${next}," ]`);
-if(nextBtn) nextBtn.click();
+if(document.getElementById("episodeList").children[next]){
+document.getElementById("episodeList").children[next].click();
+}
 };
 }
 
-/* NAV */
-function goHome(){
-loadHome();
-}
-function logout(){
-sessionStorage.removeItem("access");
-location.reload();
-}
+function goHome(){loadHome();}
+function logout(){sessionStorage.removeItem("access");location.reload();}
 </script>
 </body>
 </html>
