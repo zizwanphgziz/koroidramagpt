@@ -1,181 +1,133 @@
 <!DOCTYPE html>
 <html lang="ms">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Koroi Drama</title>
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
 <style>
 :root{
---bg:#0e0e13;
---surface:#181820;
+--bg:#0f0f15;
+--surface:#1a1a24;
 --accent:#ff003c;
 --text:#ffffff;
---muted:#9aa0a6;
---glass:rgba(255,255,255,0.05);
+--muted:#aaa;
 }
 *{box-sizing:border-box}
 body{
 margin:0;
 font-family:'Poppins',sans-serif;
-background:radial-gradient(circle at top left,#1a1a30,#0e0e13 40%);
+background:var(--bg);
 color:var(--text);
-overflow-x:hidden;
 }
 
-/* ACCESS SCREEN */
+/* BLOCK */
 #blocked{
 display:flex;
 height:100vh;
-align-items:center;
 justify-content:center;
+align-items:center;
 flex-direction:column;
-text-align:center;
 background:#000;
 }
-#blocked h1{
-font-size:32px;
-color:var(--accent);
-}
+#blocked h1{color:var(--accent);}
 
 /* HEADER */
 header{
 display:flex;
 justify-content:space-between;
 align-items:center;
-padding:20px 5%;
+padding:15px 5%;
+background:#111;
 position:sticky;
 top:0;
-backdrop-filter:blur(15px);
-background:rgba(0,0,0,0.5);
-z-index:100;
+z-index:10;
 }
 header h1{
 margin:0;
-font-weight:700;
-background:linear-gradient(90deg,#ff003c,#ff5f6d);
--webkit-background-clip:text;
--webkit-text-fill-color:transparent;
+color:var(--accent);
+}
+header button{
+background:none;
+border:1px solid #444;
+color:#fff;
+padding:6px 12px;
+cursor:pointer;
 }
 
 /* HERO */
 .hero{
-position:relative;
-height:55vh;
-display:flex;
-align-items:flex-end;
-padding:40px 5%;
+height:50vh;
 background-size:cover;
 background-position:center;
-border-bottom:1px solid #222;
+display:flex;
+align-items:flex-end;
+padding:30px 5%;
 }
-.hero::after{
-content:"";
-position:absolute;
-inset:0;
-background:linear-gradient(to top,rgba(0,0,0,0.9),rgba(0,0,0,0.2));
-}
-.hero-content{
-position:relative;
-z-index:2;
-max-width:600px;
-}
-.hero h2{
+.hero-content h2{
 margin:0 0 10px;
-font-size:32px;
 }
-.hero button{
+.hero-content button{
 background:var(--accent);
 border:none;
-padding:12px 20px;
-color:white;
-font-weight:600;
-border-radius:6px;
+padding:10px 15px;
+color:#fff;
 cursor:pointer;
 }
 
-/* CATEGORY */
-.section{
-padding:30px 5%;
-}
-.section h3{
-margin-bottom:15px;
-}
+/* SECTION */
+.section{padding:25px 5%}
 .row{
 display:flex;
 gap:15px;
 overflow-x:auto;
-scroll-behavior:smooth;
 }
 .card{
-min-width:180px;
+min-width:160px;
 background:var(--surface);
-border-radius:10px;
-overflow:hidden;
+border-radius:8px;
 cursor:pointer;
-transition:0.3s;
-}
-.card:hover{
-transform:scale(1.07);
-box-shadow:0 10px 20px rgba(0,0,0,0.6);
+overflow:hidden;
 }
 .card img{
 width:100%;
-height:250px;
+height:220px;
 object-fit:cover;
 }
 .card p{
-padding:10px;
+margin:0;
+padding:8px;
 font-size:14px;
-white-space:nowrap;
-overflow:hidden;
-text-overflow:ellipsis;
 }
 
-/* PLAYER PAGE */
-#playerPage{
-display:none;
-padding:20px 5%;
-animation:fadeIn 0.3s ease;
-}
+/* PLAYER */
+#playerPage{display:none;padding:20px 5%}
 video{
 width:100%;
-max-height:75vh;
-border-radius:10px;
+max-height:70vh;
 background:black;
 }
 .episode-list{
 display:flex;
 flex-wrap:wrap;
-gap:10px;
-margin-top:20px;
+gap:8px;
+margin-top:15px;
 }
 .episode{
-background:var(--glass);
-padding:10px 15px;
-border-radius:6px;
+padding:8px 12px;
+background:#222;
 cursor:pointer;
-transition:0.2s;
-}
-.episode:hover{
-background:var(--accent);
+border-radius:4px;
 }
 .episode.active{
 background:var(--accent);
-font-weight:bold;
-}
-
-@keyframes fadeIn{
-from{opacity:0}
-to{opacity:1}
 }
 </style>
 </head>
+
 <body>
 
 <div id="blocked">
@@ -187,10 +139,13 @@ to{opacity:1}
 
 <header>
 <h1>Koroi Drama</h1>
+<div>
 <button onclick="goHome()">Home</button>
+<button onclick="logout()">Logout</button>
+</div>
 </header>
 
-<div class="hero" id="hero"></div>
+<div id="hero" class="hero"></div>
 
 <div id="homepage"></div>
 
@@ -219,23 +174,38 @@ loadHome();
 document.getElementById("blocked").style.display="flex";
 }
 
+/* API */
 async function apiCall(endpoint){
-const target=`https://captain.sapimu.au${endpoint}?lang=in`;
+const target=`https://captain.sapimu.au${endpoint}&lang=in`;
 const res=await fetch(`${apiBase}?url=${encodeURIComponent(target)}`);
 return await res.json();
 }
 
+/* HOME */
 async function loadHome(){
 const container=document.getElementById("homepage");
-container.innerHTML="Loading...";
-const res=await apiCall("/dramabox/api/v1/new/1?pageSize=20");
 container.innerHTML="";
+document.getElementById("playerPage").style.display="none";
+document.getElementById("hero").style.display="flex";
+
+const categories=[
+{title:"Terbaru",endpoint:"/dramabox/api/v1/new/1?pageSize=20"},
+{title:"Paling Hangat",endpoint:"/dramabox/api/v1/rank/1?pageSize=20"},
+{title:"Mesti Tonton",endpoint:"/dramabox/api/v1/classify?pageSize=20&sort=1"}
+];
+
+for(let cat of categories){
+const res=await apiCall(cat.endpoint);
 if(res?.data?.list){
-createSection("Terbaru",res.data.list);
+createSection(cat.title,res.data.list);
+if(cat.title==="Terbaru"){
 setHero(res.data.list[0]);
 }
 }
+}
+}
 
+/* HERO */
 function setHero(item){
 const hero=document.getElementById("hero");
 hero.style.backgroundImage=`url(${item.cover})`;
@@ -243,15 +213,16 @@ hero.innerHTML=`
 <div class="hero-content">
 <h2>${item.bookName}</h2>
 <button onclick="openDetails(${item.bookId},'${item.bookName.replace(/'/g,"")}')">Tonton Sekarang</button>
-</div>
-`;
+</div>`;
 }
 
+/* SECTION */
 function createSection(title,data){
 const section=document.createElement("div");
 section.className="section";
 section.innerHTML=`<h3>${title}</h3><div class="row"></div>`;
 const row=section.querySelector(".row");
+
 data.forEach(item=>{
 const card=document.createElement("div");
 card.className="card";
@@ -259,19 +230,23 @@ card.innerHTML=`<img src="${item.cover}"><p>${item.bookName}</p>`;
 card.onclick=()=>openDetails(item.bookId,item.bookName);
 row.appendChild(card);
 });
+
 document.getElementById("homepage").appendChild(section);
 }
 
+/* DETAILS */
 async function openDetails(bookId,title){
 document.getElementById("homepage").style.display="none";
 document.getElementById("hero").style.display="none";
 document.getElementById("playerPage").style.display="block";
 document.getElementById("videoTitle").textContent=title;
 
-const res=await apiCall(`/dramabox/api/v1/chapters/${bookId}`);
+const res=await apiCall(`/dramabox/api/v1/chapters/${bookId}?pageSize=500`);
 const episodes=res?.data?.chapterList||[];
+
 const list=document.getElementById("episodeList");
 list.innerHTML="";
+
 episodes.forEach(ep=>{
 const div=document.createElement("div");
 div.className="episode";
@@ -279,9 +254,12 @@ div.textContent="Ep "+(ep.chapterIndex+1);
 div.onclick=()=>playVideo(bookId,ep.chapterIndex,div);
 list.appendChild(div);
 });
+
 if(episodes.length>0) playVideo(bookId,0,list.children[0]);
 }
 
+/* VIDEO */
+let hls;
 async function playVideo(bookId,index,element){
 const res=await apiCall(`/dramabox/api/v1/watch/${bookId}/${index}`);
 const url=res?.data?.videoUrl;
@@ -292,20 +270,33 @@ if(element) element.classList.add("active");
 
 const video=document.getElementById("videoPlayer");
 
+if(hls){hls.destroy();}
+
 if(Hls.isSupported()){
-const hls=new Hls();
+hls=new Hls();
 hls.loadSource(url);
 hls.attachMedia(video);
-}else{
+hls.on(Hls.Events.MANIFEST_PARSED,function(){video.play();});
+}else if(video.canPlayType("application/vnd.apple.mpegurl")){
 video.src=url;
-}
-video.play();
+video.addEventListener("loadedmetadata",()=>video.play());
 }
 
+/* AUTOPLAY NEXT */
+video.onended=function(){
+const next=index+1;
+const nextBtn=document.querySelector(`[onclick*=",${next}," ]`);
+if(nextBtn) nextBtn.click();
+};
+}
+
+/* NAV */
 function goHome(){
-document.getElementById("homepage").style.display="block";
-document.getElementById("hero").style.display="flex";
-document.getElementById("playerPage").style.display="none";
+loadHome();
+}
+function logout(){
+sessionStorage.removeItem("access");
+location.reload();
 }
 </script>
 </body>
