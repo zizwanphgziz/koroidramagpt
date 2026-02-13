@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Koroi Drama</title>
 
+<link rel="icon" href="https://i.imgur.com/MC7KXb2.png">
+
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;900&display=swap');
 
@@ -30,17 +32,18 @@ position:fixed;
 top:50%;
 left:50%;
 transform:translate(-50%,-50%);
-width:80vw;
-max-width:700px;
+width:85vw;
+max-width:750px;
 opacity:0.05;
 z-index:0;
-animation:spin 60s linear infinite;
 pointer-events:none;
+animation:spinFade 60s linear infinite;
 }
 
-@keyframes spin{
-from{transform:translate(-50%,-50%) rotate(0deg);}
-to{transform:translate(-50%,-50%) rotate(360deg);}
+@keyframes spinFade{
+0%{transform:translate(-50%,-50%) rotate(0deg);opacity:0.04;}
+50%{opacity:0.09;}
+100%{transform:translate(-50%,-50%) rotate(360deg);opacity:0.04;}
 }
 
 /* ================= HEADER ================= */
@@ -49,7 +52,7 @@ header{
 display:flex;
 align-items:center;
 justify-content:space-between;
-padding:14px 18px;
+padding:14px 20px;
 position:relative;
 z-index:10;
 background:rgba(0,0,0,0.6);
@@ -63,27 +66,27 @@ gap:14px;
 }
 
 .logo-wrap img{
-width:64px;
-height:64px;
+width:72px;
+height:72px;
 object-fit:contain;
-filter:drop-shadow(0 0 8px rgba(255,0,100,0.4));
+filter:drop-shadow(0 0 10px rgba(255,0,100,0.4));
 }
 
 .brand-title{
-font-size:26px;
+font-size:28px;
 font-weight:900;
 background:linear-gradient(90deg,#ff003c,#ff4b2b,#ff003c);
 -webkit-background-clip:text;
 -webkit-text-fill-color:transparent;
 letter-spacing:1px;
-text-shadow:0 0 12px rgba(255,0,60,0.4);
+text-shadow:0 0 14px rgba(255,0,60,0.4);
 }
 
 #logoutButton{
 background:linear-gradient(90deg,#ff003c,#ff4b2b);
 border:none;
 color:#fff;
-padding:10px 18px;
+padding:10px 20px;
 border-radius:40px;
 font-weight:700;
 cursor:pointer;
@@ -92,7 +95,7 @@ transition:all .25s ease;
 }
 
 #logoutButton:hover{
-transform:scale(1.05);
+transform:scale(1.06);
 box-shadow:0 6px 25px rgba(255,0,60,0.6);
 }
 
@@ -100,21 +103,21 @@ box-shadow:0 6px 25px rgba(255,0,60,0.6);
 
 .hero{
 position:relative;
-margin:20px auto;
+margin:24px auto;
 width:90%;
 max-width:1100px;
-border-radius:20px;
+border-radius:24px;
 overflow:hidden;
 background:#000;
 z-index:5;
+box-shadow:0 20px 60px rgba(0,0,0,0.6);
 }
 
 .hero video{
 width:100%;
 height:260px;
 object-fit:cover;
-border-radius:20px;
-opacity:0.9;
+opacity:0.92;
 }
 
 .hero-content{
@@ -159,27 +162,37 @@ cursor:pointer;
 /* ================= CATEGORY ================= */
 
 .section{
-padding:20px;
+padding:24px 20px;
 position:relative;
 z-index:5;
 }
 
 .section h2{
-margin-bottom:12px;
+margin-bottom:14px;
+font-size:20px;
 }
 
 .grid{
-display:grid;
-grid-template-columns:repeat(2,1fr);
+display:flex;
 gap:16px;
+overflow-x:auto;
+scroll-snap-type:x mandatory;
+padding-bottom:10px;
+}
+
+.grid::-webkit-scrollbar{
+display:none;
 }
 
 .card{
+min-width:160px;
+flex:0 0 auto;
+scroll-snap-align:start;
 background:var(--card);
-border-radius:16px;
+border-radius:18px;
 overflow:hidden;
 cursor:pointer;
-transition:.2s;
+transition:.25s;
 }
 
 .card img{
@@ -194,15 +207,15 @@ font-size:14px;
 }
 
 .card:hover{
-transform:scale(1.04);
+transform:scale(1.06);
 }
 
 @media(min-width:768px){
-.grid{
-grid-template-columns:repeat(4,1fr);
-}
 .hero video{
 height:380px;
+}
+.card{
+min-width:220px;
 }
 }
 </style>
@@ -210,11 +223,11 @@ height:380px;
 
 <body>
 
-<img class="bg-logo" src="https://i.imgur.com/81GF8Ah.jpeg">
+<img class="bg-logo" src="https://i.imgur.com/MC7KXb2.png">
 
 <header>
 <div class="logo-wrap">
-<img src="https://i.imgur.com/81GF8Ah.jpeg">
+<img src="https://i.imgur.com/MC7KXb2.png">
 <div class="brand-title">Koroi Drama</div>
 </div>
 <button id="logoutButton">Log Keluar</button>
@@ -245,15 +258,19 @@ return res.json();
 
 async function loadHome(){
 
-const data=await apiCall("/dramabox/api/v1/new/1?pageSize=20");
+const terbaru=await apiCall("/dramabox/api/v1/new/1?pageSize=20");
+const hangat=await apiCall("/dramabox/api/v1/rank/1?pageSize=20");
+const mesti=await apiCall("/dramabox/api/v1/classify?pageSize=20&sort=1");
 
-heroList=data.data.list.slice(0,5);
+heroList=terbaru.data.list.slice(0,5);
 updateHero();
 
 const content=document.getElementById("content");
 content.innerHTML="";
 
-createSection("Terbaru",data.data.list);
+createSection("Terbaru", terbaru.data.list);
+createSection("Paling Hangat", hangat.data.list);
+createSection("Mesti Tonton", mesti.data.list);
 
 }
 
@@ -273,7 +290,6 @@ card.innerHTML=`
 <img src="${item.cover}">
 <p>${item.bookName}</p>
 `;
-card.onclick=()=>alert("Detail page next phase 😎");
 grid.appendChild(card);
 });
 
@@ -290,14 +306,9 @@ document.getElementById("heroDesc").innerText=item.introduction;
 
 const watch=await apiCall(`/dramabox/api/v1/watch/${item.bookId}/0`);
 
-if(watch.data.videoUrl){
-const heroVideo=document.getElementById("heroVideo");
-heroVideo.src=watch.data.videoUrl;
+if(watch?.data?.videoUrl){
+document.getElementById("heroVideo").src=watch.data.videoUrl;
 }
-
-document.getElementById("heroPlay").onclick=()=>{
-alert("Detail page next phase 😎");
-};
 
 heroIndex=(heroIndex+1)%heroList.length;
 
