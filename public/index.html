@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Koroi Drama</title>
 
+<link rel="icon" href="data:,">
+
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap');
 
@@ -60,6 +62,11 @@ background:var(--surface);
 border-radius:8px;
 overflow:hidden;
 cursor:pointer;
+transition:0.3s;
+}
+
+.drama-card:hover{
+transform:scale(1.05);
 }
 
 .drama-card img{
@@ -132,7 +139,7 @@ background:#000;
 </div>
 
 <div id="details-page">
-<button onclick="loadAllCategories()">← Kembali</button>
+<button id="backButton">← Kembali</button>
 <h2 id="videoTitle"></h2>
 <video id="videoPlayer" controls controlsList="nodownload"></video>
 <div class="episode-list" id="episodeList"></div>
@@ -147,7 +154,7 @@ document.addEventListener("DOMContentLoaded", function(){
 const ACCESS_KEY="koroi2026";
 const config={ apiBaseUrl:"/api/proxy" };
 
-/* ===== ELEMENT DECLARATION ===== */
+/* ===== ELEMENTS ===== */
 const homepage=document.getElementById('homepage');
 const detailsPage=document.getElementById('details-page');
 const categoryContainer=document.getElementById('category-container');
@@ -155,6 +162,7 @@ const videoPlayer=document.getElementById('videoPlayer');
 const videoTitle=document.getElementById('videoTitle');
 const episodeList=document.getElementById('episodeList');
 const logoutButton=document.getElementById('logoutButton');
+const backButton=document.getElementById('backButton');
 const blocked=document.getElementById('blocked');
 const appContent=document.getElementById('app-content');
 
@@ -253,6 +261,8 @@ if(current) current.classList.add('playing');
 }
 }
 
+/* ===== EVENTS ===== */
+
 videoPlayer.addEventListener('ended',()=>{
 const current=parseInt(videoPlayer.dataset.currentEpisodeIndex);
 const next=document.querySelector(`[data-index='${current+1}']`);
@@ -264,7 +274,9 @@ sessionStorage.removeItem('isLoggedIn');
 location.reload();
 });
 
-/* ===== ACCESS SYSTEM (LAST) ===== */
+backButton.addEventListener('click', loadAllCategories);
+
+/* ===== ACCESS CONTROL ===== */
 
 const params=new URLSearchParams(window.location.search);
 
