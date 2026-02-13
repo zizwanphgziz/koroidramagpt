@@ -23,20 +23,30 @@ font-family:'Poppins',sans-serif;
 background:var(--bg);
 color:var(--text);
 margin:0;
+overflow-x:hidden;
 }
 
+/* ===== HEADER ===== */
+
 header{
-padding:20px 4%;
+position:fixed;
+top:0;
+width:100%;
+padding:15px 4%;
 display:flex;
 justify-content:space-between;
 align-items:center;
+backdrop-filter:blur(10px);
+background:rgba(0,0,0,0.4);
+z-index:1000;
 }
 
-h1{
+.logo{
+font-size:22px;
+font-weight:700;
 background:linear-gradient(90deg,#f40612,#E50914,#d10811);
 -webkit-background-clip:text;
 -webkit-text-fill-color:transparent;
-margin:0;
 }
 
 #logoutButton{
@@ -45,28 +55,98 @@ border:1px solid var(--muted);
 color:var(--muted);
 padding:6px 12px;
 cursor:pointer;
+border-radius:5px;
 }
 
-.container{padding:0 4%;}
-.category-section{margin-bottom:40px;}
+/* ===== HERO ===== */
+
+.hero{
+position:relative;
+height:80vh;
+display:flex;
+align-items:center;
+padding:0 4%;
+color:white;
+}
+
+.hero-bg{
+position:absolute;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background-size:cover;
+background-position:center;
+filter:blur(20px);
+transform:scale(1.1);
+z-index:-2;
+}
+
+.hero-overlay{
+position:absolute;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:linear-gradient(to top, #0b0b0f 20%, rgba(0,0,0,0.4));
+z-index:-1;
+}
+
+.hero-content{
+max-width:600px;
+}
+
+.hero-title{
+font-size:48px;
+font-weight:700;
+margin-bottom:20px;
+}
+
+.hero-desc{
+color:var(--muted);
+margin-bottom:20px;
+}
+
+.hero-btn{
+background:var(--brand);
+border:none;
+padding:12px 24px;
+color:white;
+cursor:pointer;
+border-radius:5px;
+font-weight:600;
+}
+
+/* ===== CATEGORY ===== */
+
+.container{
+padding:0 4%;
+margin-top:80vh;
+}
+
+.category-section{
+margin-bottom:40px;
+}
 
 .drama-grid{
 display:flex;
-overflow-x:auto;
 gap:15px;
+overflow-x:auto;
 }
 
 .drama-card{
 flex:0 0 180px;
 background:var(--surface);
-border-radius:8px;
+border-radius:10px;
 overflow:hidden;
 cursor:pointer;
 transition:0.3s;
+position:relative;
 }
 
 .drama-card:hover{
-transform:scale(1.05);
+transform:scale(1.07);
+box-shadow:0 15px 30px rgba(0,0,0,0.6);
 }
 
 .drama-card img{
@@ -77,37 +157,43 @@ object-fit:cover;
 
 .drama-card-title{
 padding:10px;
-white-space:nowrap;
-overflow:hidden;
-text-overflow:ellipsis;
+font-size:14px;
 }
 
-#details-page{display:none;}
+/* ===== DETAILS ===== */
+
+#details-page{
+display:none;
+padding:100px 4% 50px;
+}
 
 #videoPlayer{
 width:100%;
 max-width:900px;
 background:#000;
-border-radius:8px;
+border-radius:10px;
 }
 
 .episode-list{
 display:grid;
-grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+grid-template-columns:repeat(auto-fill,minmax(120px,1fr));
 gap:10px;
 margin-top:20px;
 }
 
 .episode-item{
 background:#282828;
-padding:12px;
+padding:10px;
 text-align:center;
 cursor:pointer;
+border-radius:5px;
 }
 
 .episode-item.playing{
 background:var(--brand);
 }
+
+/* ===== ACCESS BLOCK ===== */
 
 #blocked{
 display:flex;
@@ -128,14 +214,24 @@ background:#000;
 </div>
 
 <div id="app-content" style="display:none;">
-<div class="container">
 
-<div id="homepage">
 <header>
-<h1>Koroi Drama</h1>
+<div class="logo">Koroi Drama</div>
 <button id="logoutButton">Log Keluar</button>
 </header>
-<main id="category-container"></main>
+
+<div class="hero">
+<div class="hero-bg" id="heroBg"></div>
+<div class="hero-overlay"></div>
+<div class="hero-content">
+<div class="hero-title" id="heroTitle"></div>
+<div class="hero-desc" id="heroDesc"></div>
+<button class="hero-btn" id="heroPlay">Tonton Sekarang</button>
+</div>
+</div>
+
+<div class="container">
+<div id="homepage"></div>
 </div>
 
 <div id="details-page">
@@ -146,7 +242,6 @@ background:#000;
 </div>
 
 </div>
-</div>
 
 <script>
 document.addEventListener("DOMContentLoaded", function(){
@@ -154,34 +249,55 @@ document.addEventListener("DOMContentLoaded", function(){
 const ACCESS_KEY="koroi2026";
 const config={ apiBaseUrl:"/api/proxy" };
 
-/* ===== ELEMENTS ===== */
-const homepage=document.getElementById('homepage');
-const detailsPage=document.getElementById('details-page');
-const categoryContainer=document.getElementById('category-container');
-const videoPlayer=document.getElementById('videoPlayer');
-const videoTitle=document.getElementById('videoTitle');
-const episodeList=document.getElementById('episodeList');
-const logoutButton=document.getElementById('logoutButton');
-const backButton=document.getElementById('backButton');
 const blocked=document.getElementById('blocked');
 const appContent=document.getElementById('app-content');
+const homepage=document.getElementById('homepage');
+const detailsPage=document.getElementById('details-page');
+const heroBg=document.getElementById('heroBg');
+const heroTitle=document.getElementById('heroTitle');
+const heroDesc=document.getElementById('heroDesc');
+const heroPlay=document.getElementById('heroPlay');
+const videoPlayer=document.getElementById('videoPlayer');
+const episodeList=document.getElementById('episodeList');
+const videoTitle=document.getElementById('videoTitle');
+const logoutButton=document.getElementById('logoutButton');
+const backButton=document.getElementById('backButton');
 
-/* ===== FUNCTIONS ===== */
-
-function showPage(page){
-homepage.style.display=page==='home'?'block':'none';
-detailsPage.style.display=page==='details'?'block':'none';
-if(page==='home'){
-videoPlayer.pause();
-videoPlayer.src="";
-}
-}
+let heroBookId=null;
 
 async function apiCall(endpoint, lang='in'){
 const targetUrl=`https://captain.sapimu.au${endpoint}?lang=${lang}`;
 const proxyUrl=`${config.apiBaseUrl}?url=${encodeURIComponent(targetUrl)}`;
 const response=await fetch(proxyUrl);
 return await response.json();
+}
+
+function showPage(page){
+homepage.style.display=page==='home'?'block':'none';
+detailsPage.style.display=page==='details'?'block':'none';
+if(page==='home'){ videoPlayer.pause(); videoPlayer.src=""; }
+}
+
+async function loadAllCategories(){
+showPage('home');
+homepage.innerHTML='Memuatkan...';
+
+const response=await apiCall("/dramabox/api/v1/new/1?pageSize=20");
+
+if(response?.data?.list){
+
+const list=response.data.list;
+
+heroBookId=list[0].bookId;
+heroTitle.textContent=list[0].bookName;
+heroDesc.textContent=list[0].introduction;
+heroBg.style.backgroundImage=`url(${list[0].cover})`;
+
+heroPlay.onclick=()=>showDetailsPage(list[0].bookId,list[0].bookName);
+
+homepage.innerHTML='';
+displayCategory("Terbaru", list);
+}
 }
 
 function displayCategory(title,dramas){
@@ -199,33 +315,13 @@ card.onclick=()=>showDetailsPage(drama.bookId,drama.bookName);
 grid.appendChild(card);
 });
 
-categoryContainer.appendChild(section);
-}
-
-async function loadAllCategories(){
-showPage('home');
-categoryContainer.innerHTML='Memuatkan...';
-
-const categories=[
-{title:"Terbaru",endpoint:"/dramabox/api/v1/new/1?pageSize=20"},
-{title:"Paling Hangat",endpoint:"/dramabox/api/v1/rank/1?pageSize=20"},
-{title:"Mesti Tonton",endpoint:"/dramabox/api/v1/classify?pageSize=20&sort=1"}
-];
-
-const responses=await Promise.all(categories.map(cat=>apiCall(cat.endpoint)));
-
-categoryContainer.innerHTML='';
-responses.forEach((res,i)=>{
-if(res?.data?.list){
-displayCategory(categories[i].title,res.data.list);
-}
-});
+homepage.appendChild(section);
 }
 
 async function showDetailsPage(bookId,title){
 showPage('details');
 videoTitle.textContent=title;
-episodeList.innerHTML='Memuatkan episod...';
+episodeList.innerHTML='Memuatkan...';
 
 const response=await apiCall(`/dramabox/api/v1/chapters/${bookId}`);
 if(response?.data?.chapterList){
@@ -241,8 +337,7 @@ episodeList.innerHTML='';
 episodes.forEach(ep=>{
 const item=document.createElement('div');
 item.className='episode-item';
-item.textContent=`Episod ${ep.chapterIndex+1}`;
-item.dataset.index=ep.chapterIndex;
+item.textContent=`Ep ${ep.chapterIndex+1}`;
 item.onclick=()=>playVideo(bookId,ep.chapterIndex);
 episodeList.appendChild(item);
 });
@@ -253,30 +348,15 @@ const response=await apiCall(`/dramabox/api/v1/watch/${bookId}/${index}`);
 if(response?.data?.videoUrl){
 videoPlayer.src=response.data.videoUrl;
 videoPlayer.play();
-videoPlayer.dataset.currentEpisodeIndex=index;
-
-document.querySelectorAll('.episode-item').forEach(i=>i.classList.remove('playing'));
-const current=document.querySelector(`[data-index='${index}']`);
-if(current) current.classList.add('playing');
 }
 }
 
-/* ===== EVENTS ===== */
-
-videoPlayer.addEventListener('ended',()=>{
-const current=parseInt(videoPlayer.dataset.currentEpisodeIndex);
-const next=document.querySelector(`[data-index='${current+1}']`);
-if(next) next.click();
-});
-
-logoutButton.addEventListener('click',()=>{
+logoutButton.onclick=()=>{
 sessionStorage.removeItem('isLoggedIn');
 location.reload();
-});
+};
 
-backButton.addEventListener('click', loadAllCategories);
-
-/* ===== ACCESS CONTROL ===== */
+backButton.onclick=loadAllCategories;
 
 const params=new URLSearchParams(window.location.search);
 
