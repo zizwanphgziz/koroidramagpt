@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Koroi Drama</title>
-
 <link rel="icon" href="data:,">
 
 <style>
@@ -36,8 +35,8 @@ padding:15px 4%;
 display:flex;
 justify-content:space-between;
 align-items:center;
-backdrop-filter:blur(10px);
-background:rgba(0,0,0,0.4);
+backdrop-filter:blur(12px);
+background:rgba(0,0,0,0.45);
 z-index:1000;
 }
 
@@ -55,18 +54,22 @@ border:1px solid var(--muted);
 color:var(--muted);
 padding:6px 12px;
 cursor:pointer;
-border-radius:5px;
+border-radius:6px;
 }
 
 /* ===== HERO ===== */
 
+#home-section{
+margin-top:70px;
+}
+
 .hero{
 position:relative;
-height:80vh;
+height:65vh;
 display:flex;
 align-items:center;
 padding:0 4%;
-color:white;
+overflow:hidden;
 }
 
 .hero-bg{
@@ -77,8 +80,20 @@ width:100%;
 height:100%;
 background-size:cover;
 background-position:center;
-filter:blur(20px);
-transform:scale(1.1);
+filter:blur(8px);
+transform:scale(1.05);
+z-index:-3;
+}
+
+.hero-video{
+position:absolute;
+top:0;
+left:0;
+width:100%;
+height:100%;
+object-fit:cover;
+opacity:0;
+transition:opacity 1.2s ease;
 z-index:-2;
 }
 
@@ -88,7 +103,7 @@ top:0;
 left:0;
 width:100%;
 height:100%;
-background:linear-gradient(to top, #0b0b0f 20%, rgba(0,0,0,0.4));
+background:linear-gradient(to top,#0b0b0f 15%,rgba(0,0,0,0.4));
 z-index:-1;
 }
 
@@ -97,14 +112,15 @@ max-width:600px;
 }
 
 .hero-title{
-font-size:48px;
+font-size:42px;
 font-weight:700;
-margin-bottom:20px;
+margin-bottom:15px;
 }
 
 .hero-desc{
 color:var(--muted);
 margin-bottom:20px;
+line-height:1.5;
 }
 
 .hero-btn{
@@ -113,7 +129,7 @@ border:none;
 padding:12px 24px;
 color:white;
 cursor:pointer;
-border-radius:5px;
+border-radius:6px;
 font-weight:600;
 }
 
@@ -121,7 +137,6 @@ font-weight:600;
 
 .container{
 padding:0 4%;
-margin-top:80vh;
 }
 
 .category-section{
@@ -132,6 +147,7 @@ margin-bottom:40px;
 display:flex;
 gap:15px;
 overflow-x:auto;
+padding-bottom:10px;
 }
 
 .drama-card{
@@ -141,7 +157,6 @@ border-radius:10px;
 overflow:hidden;
 cursor:pointer;
 transition:0.3s;
-position:relative;
 }
 
 .drama-card:hover{
@@ -193,7 +208,7 @@ border-radius:5px;
 background:var(--brand);
 }
 
-/* ===== ACCESS BLOCK ===== */
+/* ===== BLOCKED ===== */
 
 #blocked{
 display:flex;
@@ -220,8 +235,10 @@ background:#000;
 <button id="logoutButton">Log Keluar</button>
 </header>
 
+<div id="home-section">
 <div class="hero">
 <div class="hero-bg" id="heroBg"></div>
+<video id="heroVideo" class="hero-video" muted autoplay loop playsinline></video>
 <div class="hero-overlay"></div>
 <div class="hero-content">
 <div class="hero-title" id="heroTitle"></div>
@@ -232,6 +249,7 @@ background:#000;
 
 <div class="container">
 <div id="homepage"></div>
+</div>
 </div>
 
 <div id="details-page">
@@ -251,9 +269,11 @@ const config={ apiBaseUrl:"/api/proxy" };
 
 const blocked=document.getElementById('blocked');
 const appContent=document.getElementById('app-content');
+const homeSection=document.getElementById('home-section');
 const homepage=document.getElementById('homepage');
 const detailsPage=document.getElementById('details-page');
 const heroBg=document.getElementById('heroBg');
+const heroVideo=document.getElementById('heroVideo');
 const heroTitle=document.getElementById('heroTitle');
 const heroDesc=document.getElementById('heroDesc');
 const heroPlay=document.getElementById('heroPlay');
@@ -263,41 +283,20 @@ const videoTitle=document.getElementById('videoTitle');
 const logoutButton=document.getElementById('logoutButton');
 const backButton=document.getElementById('backButton');
 
-let heroBookId=null;
+function showPage(page){
+homeSection.style.display=page==='home'?'block':'none';
+detailsPage.style.display=page==='details'?'block':'none';
+if(page==='home'){
+videoPlayer.pause();
+videoPlayer.src="";
+}
+}
 
 async function apiCall(endpoint, lang='in'){
 const targetUrl=`https://captain.sapimu.au${endpoint}?lang=${lang}`;
 const proxyUrl=`${config.apiBaseUrl}?url=${encodeURIComponent(targetUrl)}`;
 const response=await fetch(proxyUrl);
 return await response.json();
-}
-
-function showPage(page){
-homepage.style.display=page==='home'?'block':'none';
-detailsPage.style.display=page==='details'?'block':'none';
-if(page==='home'){ videoPlayer.pause(); videoPlayer.src=""; }
-}
-
-async function loadAllCategories(){
-showPage('home');
-homepage.innerHTML='Memuatkan...';
-
-const response=await apiCall("/dramabox/api/v1/new/1?pageSize=20");
-
-if(response?.data?.list){
-
-const list=response.data.list;
-
-heroBookId=list[0].bookId;
-heroTitle.textContent=list[0].bookName;
-heroDesc.textContent=list[0].introduction;
-heroBg.style.backgroundImage=`url(${list[0].cover})`;
-
-heroPlay.onclick=()=>showDetailsPage(list[0].bookId,list[0].bookName);
-
-homepage.innerHTML='';
-displayCategory("Terbaru", list);
-}
 }
 
 function displayCategory(title,dramas){
@@ -318,10 +317,49 @@ grid.appendChild(card);
 homepage.appendChild(section);
 }
 
+async function loadAllCategories(){
+showPage('home');
+homepage.innerHTML='Memuatkan...';
+
+const categories=[
+{title:"Terbaru",endpoint:"/dramabox/api/v1/new/1?pageSize=20"},
+{title:"Paling Hangat",endpoint:"/dramabox/api/v1/rank/1?pageSize=20"},
+{title:"Mesti Tonton",endpoint:"/dramabox/api/v1/classify?pageSize=20&sort=1"}
+];
+
+const responses=await Promise.all(categories.map(cat=>apiCall(cat.endpoint)));
+
+homepage.innerHTML='';
+
+for(let i=0;i<responses.length;i++){
+const res=responses[i];
+if(res?.data?.list){
+
+if(i===0){
+const first=res.data.list[0];
+heroTitle.textContent=first.bookName;
+heroDesc.textContent=first.introduction;
+heroBg.style.backgroundImage=`url(${first.cover})`;
+heroPlay.onclick=()=>showDetailsPage(first.bookId,first.bookName);
+
+const watchRes=await apiCall(`/dramabox/api/v1/watch/${first.bookId}/0`);
+if(watchRes?.data?.videoUrl){
+heroVideo.src=watchRes.data.videoUrl;
+heroVideo.addEventListener('loadeddata',()=>{
+heroVideo.style.opacity=1;
+});
+}
+}
+
+displayCategory(categories[i].title,res.data.list);
+}
+}
+}
+
 async function showDetailsPage(bookId,title){
 showPage('details');
 videoTitle.textContent=title;
-episodeList.innerHTML='Memuatkan...';
+episodeList.innerHTML='Memuatkan episod...';
 
 const response=await apiCall(`/dramabox/api/v1/chapters/${bookId}`);
 if(response?.data?.chapterList){
