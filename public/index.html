@@ -306,9 +306,10 @@ const header=document.querySelector('header');
 let heroIndex=0;
 let heroList=[];
 let heroInterval=null;
+let heroShouldPlay=true;
 let isHoveringHero=false;
 
-/* PAGE CONTROL */
+/* PAGE */
 
 function showPage(page){
 homeSection.style.display=page==='home'?'block':'none';
@@ -319,6 +320,14 @@ videoPlayer.src="";
 }
 }
 
+/* SAFE PLAY */
+
+function tryPlayHero(){
+if(!heroShouldPlay) return;
+if(isHoveringHero) return;
+heroVideo.play().catch(()=>{});
+}
+
 /* API */
 
 async function apiCall(endpoint, lang='in'){
@@ -326,6 +335,44 @@ const targetUrl=`https://captain.sapimu.au${endpoint}?lang=${lang}`;
 const proxyUrl=`${config.apiBaseUrl}?url=${encodeURIComponent(targetUrl)}`;
 const response=await fetch(proxyUrl);
 return await response.json();
+}
+
+/* HERO ROTATION */
+
+function startHeroRotation(){
+if(heroInterval) clearInterval(heroInterval);
+updateHero();
+heroInterval=setInterval(()=>{
+heroIndex=(heroIndex+1)%heroList.length;
+updateHero();
+},8000);
+}
+
+async function updateHero(){
+
+const current=heroList[heroIndex];
+
+heroShouldPlay=true;
+
+heroVideo.pause();
+heroVideo.removeAttribute("src");
+heroVideo.load();
+heroVideo.style.opacity=0;
+
+heroTitle.textContent=current.bookName;
+heroDesc.textContent=current.introduction;
+heroBg.style.backgroundImage=`url(${current.cover})`;
+heroPlay.onclick=()=>showDetailsPage(current.bookId,current.bookName);
+
+const watchRes=await apiCall(`/dramabox/api/v1/watch/${current.bookId}/0`);
+
+if(watchRes?.data?.videoUrl){
+heroVideo.src=watchRes.data.videoUrl;
+heroVideo.onloadeddata=()=>{
+heroVideo.style.opacity=1;
+tryPlayHero();
+};
+}
 }
 
 /* CATEGORY */
@@ -346,45 +393,6 @@ grid.appendChild(card);
 });
 
 homepage.appendChild(section);
-}
-
-/* HERO ROTATION */
-
-function startHeroRotation(){
-if(heroInterval) clearInterval(heroInterval);
-updateHero();
-heroInterval=setInterval(()=>{
-heroIndex=(heroIndex+1)%heroList.length;
-updateHero();
-},8000);
-}
-
-async function updateHero(){
-
-const current=heroList[heroIndex];
-
-heroVideo.pause();
-heroVideo.removeAttribute("src");
-heroVideo.load();
-heroVideo.style.opacity=0;
-
-heroTitle.textContent=current.bookName;
-heroDesc.textContent=current.introduction;
-heroBg.style.backgroundImage=`url(${current.cover})`;
-heroPlay.onclick=()=>showDetailsPage(current.bookId,current.bookName);
-
-const watchRes=await apiCall(`/dramabox/api/v1/watch/${current.bookId}/0`);
-
-if(watchRes?.data?.videoUrl){
-heroVideo.src=watchRes.data.videoUrl;
-
-heroVideo.onloadeddata=async ()=>{
-heroVideo.style.opacity=1;
-try{
-await heroVideo.play();
-}catch(e){}
-};
-}
 }
 
 /* DETAILS */
@@ -450,7 +458,7 @@ displayCategory(categories[i].title,res.data.list);
 }
 }
 
-/* SCROLL EFFECT */
+/* SCROLL */
 
 window.addEventListener("scroll",()=>{
 const scrollY=window.scrollY;
@@ -464,16 +472,16 @@ header.classList.remove("scrolled");
 
 if(scrollY>heroHeight*0.6){
 hero.classList.add("fade-out");
+heroShouldPlay=false;
 heroVideo.pause();
 }else{
 hero.classList.remove("fade-out");
-if(heroVideo.src && !isHoveringHero){
-heroVideo.play().catch(()=>{});
-}
+heroShouldPlay=true;
+tryPlayHero();
 }
 });
 
-/* HOVER CONTROL */
+/* HOVER */
 
 hero.addEventListener("mouseenter",()=>{
 isHoveringHero=true;
@@ -482,11 +490,7 @@ heroVideo.pause();
 
 hero.addEventListener("mouseleave",()=>{
 isHoveringHero=false;
-const scrollY=window.scrollY;
-const heroHeight=hero.offsetHeight;
-if(scrollY<=heroHeight*0.6 && heroVideo.src){
-heroVideo.play().catch(()=>{});
-}
+tryPlayHero();
 });
 
 /* NAV */
