@@ -25,7 +25,7 @@ margin:0;
 overflow-x:hidden;
 }
 
-/* ===== HEADER ===== */
+/* HEADER */
 
 header{
 position:fixed;
@@ -63,7 +63,7 @@ cursor:pointer;
 border-radius:6px;
 }
 
-/* ===== HERO ===== */
+/* HERO */
 
 #home-section{
 margin-top:70px;
@@ -151,7 +151,7 @@ border-radius:6px;
 font-weight:600;
 }
 
-/* ===== CATEGORY ===== */
+/* CATEGORY */
 
 .container{
 padding:0 4%;
@@ -193,7 +193,7 @@ padding:10px;
 font-size:14px;
 }
 
-/* ===== DETAILS ===== */
+/* DETAILS */
 
 #details-page{
 display:none;
@@ -226,7 +226,7 @@ border-radius:5px;
 background:var(--brand);
 }
 
-/* ===== BLOCKED ===== */
+/* BLOCKED */
 
 #blocked{
 display:flex;
@@ -306,6 +306,9 @@ const header=document.querySelector('header');
 let heroIndex=0;
 let heroList=[];
 let heroInterval=null;
+let isHoveringHero=false;
+
+/* PAGE CONTROL */
 
 function showPage(page){
 homeSection.style.display=page==='home'?'block':'none';
@@ -316,12 +319,16 @@ videoPlayer.src="";
 }
 }
 
+/* API */
+
 async function apiCall(endpoint, lang='in'){
 const targetUrl=`https://captain.sapimu.au${endpoint}?lang=${lang}`;
 const proxyUrl=`${config.apiBaseUrl}?url=${encodeURIComponent(targetUrl)}`;
 const response=await fetch(proxyUrl);
 return await response.json();
 }
+
+/* CATEGORY */
 
 function displayCategory(title,dramas){
 const section=document.createElement('section');
@@ -341,6 +348,8 @@ grid.appendChild(card);
 homepage.appendChild(section);
 }
 
+/* HERO ROTATION */
+
 function startHeroRotation(){
 if(heroInterval) clearInterval(heroInterval);
 updateHero();
@@ -351,50 +360,34 @@ updateHero();
 }
 
 async function updateHero(){
+
 const current=heroList[heroIndex];
 
+heroVideo.pause();
+heroVideo.removeAttribute("src");
+heroVideo.load();
 heroVideo.style.opacity=0;
+
 heroTitle.textContent=current.bookName;
 heroDesc.textContent=current.introduction;
 heroBg.style.backgroundImage=`url(${current.cover})`;
 heroPlay.onclick=()=>showDetailsPage(current.bookId,current.bookName);
 
 const watchRes=await apiCall(`/dramabox/api/v1/watch/${current.bookId}/0`);
+
 if(watchRes?.data?.videoUrl){
 heroVideo.src=watchRes.data.videoUrl;
-heroVideo.addEventListener('loadeddata',()=>{
+
+heroVideo.onloadeddata=async ()=>{
 heroVideo.style.opacity=1;
-});
+try{
+await heroVideo.play();
+}catch(e){}
+};
 }
 }
 
-async function loadAllCategories(){
-showPage('home');
-homepage.innerHTML='Memuatkan...';
-
-const categories=[
-{title:"Terbaru",endpoint:"/dramabox/api/v1/new/1?pageSize=20"},
-{title:"Paling Hangat",endpoint:"/dramabox/api/v1/rank/1?pageSize=20"},
-{title:"Mesti Tonton",endpoint:"/dramabox/api/v1/classify?pageSize=20&sort=1"}
-];
-
-const responses=await Promise.all(categories.map(cat=>apiCall(cat.endpoint)));
-
-homepage.innerHTML='';
-
-for(let i=0;i<responses.length;i++){
-const res=responses[i];
-if(res?.data?.list){
-
-if(i===0){
-heroList=res.data.list.slice(0,5);
-startHeroRotation();
-}
-
-displayCategory(categories[i].title,res.data.list);
-}
-}
-}
+/* DETAILS */
 
 async function showDetailsPage(bookId,title){
 showPage('details');
@@ -429,7 +422,35 @@ videoPlayer.play();
 }
 }
 
-/* ===== SCROLL EFFECT ===== */
+/* LOAD */
+
+async function loadAllCategories(){
+showPage('home');
+homepage.innerHTML='Memuatkan...';
+
+const categories=[
+{title:"Terbaru",endpoint:"/dramabox/api/v1/new/1?pageSize=20"},
+{title:"Paling Hangat",endpoint:"/dramabox/api/v1/rank/1?pageSize=20"},
+{title:"Mesti Tonton",endpoint:"/dramabox/api/v1/classify?pageSize=20&sort=1"}
+];
+
+const responses=await Promise.all(categories.map(cat=>apiCall(cat.endpoint)));
+
+homepage.innerHTML='';
+
+for(let i=0;i<responses.length;i++){
+const res=responses[i];
+if(res?.data?.list){
+if(i===0){
+heroList=res.data.list.slice(0,5);
+startHeroRotation();
+}
+displayCategory(categories[i].title,res.data.list);
+}
+}
+}
+
+/* SCROLL EFFECT */
 
 window.addEventListener("scroll",()=>{
 const scrollY=window.scrollY;
@@ -446,9 +467,29 @@ hero.classList.add("fade-out");
 heroVideo.pause();
 }else{
 hero.classList.remove("fade-out");
-if(heroVideo.src) heroVideo.play();
+if(heroVideo.src && !isHoveringHero){
+heroVideo.play().catch(()=>{});
+}
 }
 });
+
+/* HOVER CONTROL */
+
+hero.addEventListener("mouseenter",()=>{
+isHoveringHero=true;
+heroVideo.pause();
+});
+
+hero.addEventListener("mouseleave",()=>{
+isHoveringHero=false;
+const scrollY=window.scrollY;
+const heroHeight=hero.offsetHeight;
+if(scrollY<=heroHeight*0.6 && heroVideo.src){
+heroVideo.play().catch(()=>{});
+}
+});
+
+/* NAV */
 
 logoutButton.onclick=()=>{
 sessionStorage.removeItem('isLoggedIn');
@@ -456,6 +497,8 @@ location.reload();
 };
 
 backButton.onclick=loadAllCategories;
+
+/* ACCESS */
 
 const params=new URLSearchParams(window.location.search);
 
