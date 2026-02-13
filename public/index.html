@@ -35,9 +35,15 @@ padding:15px 4%;
 display:flex;
 justify-content:space-between;
 align-items:center;
-backdrop-filter:blur(12px);
 background:rgba(0,0,0,0.45);
+backdrop-filter:blur(12px);
 z-index:1000;
+transition:0.4s ease;
+}
+
+header.scrolled{
+background:rgba(0,0,0,0.85);
+backdrop-filter:blur(18px);
 }
 
 .logo{
@@ -70,6 +76,12 @@ display:flex;
 align-items:center;
 padding:0 4%;
 overflow:hidden;
+transition:opacity 0.6s ease, transform 0.6s ease;
+}
+
+.hero.fade-out{
+opacity:0;
+transform:translateY(-40px);
 }
 
 .hero-bg{
@@ -95,6 +107,12 @@ object-fit:cover;
 opacity:0;
 transition:opacity 1.2s ease;
 z-index:-2;
+animation:slowZoom 20s ease-in-out infinite alternate;
+}
+
+@keyframes slowZoom{
+0%{ transform:scale(1); }
+100%{ transform:scale(1.08); }
 }
 
 .hero-overlay{
@@ -272,6 +290,7 @@ const appContent=document.getElementById('app-content');
 const homeSection=document.getElementById('home-section');
 const homepage=document.getElementById('homepage');
 const detailsPage=document.getElementById('details-page');
+const hero=document.querySelector('.hero');
 const heroBg=document.getElementById('heroBg');
 const heroVideo=document.getElementById('heroVideo');
 const heroTitle=document.getElementById('heroTitle');
@@ -282,6 +301,11 @@ const episodeList=document.getElementById('episodeList');
 const videoTitle=document.getElementById('videoTitle');
 const logoutButton=document.getElementById('logoutButton');
 const backButton=document.getElementById('backButton');
+const header=document.querySelector('header');
+
+let heroIndex=0;
+let heroList=[];
+let heroInterval=null;
 
 function showPage(page){
 homeSection.style.display=page==='home'?'block':'none';
@@ -317,6 +341,33 @@ grid.appendChild(card);
 homepage.appendChild(section);
 }
 
+function startHeroRotation(){
+if(heroInterval) clearInterval(heroInterval);
+updateHero();
+heroInterval=setInterval(()=>{
+heroIndex=(heroIndex+1)%heroList.length;
+updateHero();
+},8000);
+}
+
+async function updateHero(){
+const current=heroList[heroIndex];
+
+heroVideo.style.opacity=0;
+heroTitle.textContent=current.bookName;
+heroDesc.textContent=current.introduction;
+heroBg.style.backgroundImage=`url(${current.cover})`;
+heroPlay.onclick=()=>showDetailsPage(current.bookId,current.bookName);
+
+const watchRes=await apiCall(`/dramabox/api/v1/watch/${current.bookId}/0`);
+if(watchRes?.data?.videoUrl){
+heroVideo.src=watchRes.data.videoUrl;
+heroVideo.addEventListener('loadeddata',()=>{
+heroVideo.style.opacity=1;
+});
+}
+}
+
 async function loadAllCategories(){
 showPage('home');
 homepage.innerHTML='Memuatkan...';
@@ -336,19 +387,8 @@ const res=responses[i];
 if(res?.data?.list){
 
 if(i===0){
-const first=res.data.list[0];
-heroTitle.textContent=first.bookName;
-heroDesc.textContent=first.introduction;
-heroBg.style.backgroundImage=`url(${first.cover})`;
-heroPlay.onclick=()=>showDetailsPage(first.bookId,first.bookName);
-
-const watchRes=await apiCall(`/dramabox/api/v1/watch/${first.bookId}/0`);
-if(watchRes?.data?.videoUrl){
-heroVideo.src=watchRes.data.videoUrl;
-heroVideo.addEventListener('loadeddata',()=>{
-heroVideo.style.opacity=1;
-});
-}
+heroList=res.data.list.slice(0,5);
+startHeroRotation();
 }
 
 displayCategory(categories[i].title,res.data.list);
@@ -388,6 +428,27 @@ videoPlayer.src=response.data.videoUrl;
 videoPlayer.play();
 }
 }
+
+/* ===== SCROLL EFFECT ===== */
+
+window.addEventListener("scroll",()=>{
+const scrollY=window.scrollY;
+const heroHeight=hero.offsetHeight;
+
+if(scrollY>50){
+header.classList.add("scrolled");
+}else{
+header.classList.remove("scrolled");
+}
+
+if(scrollY>heroHeight*0.6){
+hero.classList.add("fade-out");
+heroVideo.pause();
+}else{
+hero.classList.remove("fade-out");
+if(heroVideo.src) heroVideo.play();
+}
+});
 
 logoutButton.onclick=()=>{
 sessionStorage.removeItem('isLoggedIn');
