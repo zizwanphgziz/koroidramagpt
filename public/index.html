@@ -142,24 +142,12 @@ background:#000;
 </div>
 
 <script>
+document.addEventListener("DOMContentLoaded", function(){
+
 const ACCESS_KEY="koroi2026";
 const config={ apiBaseUrl:"/api/proxy" };
 
-const params=new URLSearchParams(window.location.search);
-
-if(params.get("access")===ACCESS_KEY){
-sessionStorage.setItem("isLoggedIn","true");
-history.replaceState({},document.title,window.location.pathname);
-}
-
-if(sessionStorage.getItem("isLoggedIn")==="true"){
-document.getElementById("blocked").style.display="none";
-document.getElementById("app-content").style.display="block";
-loadAllCategories();
-}else{
-document.getElementById("blocked").style.display="flex";
-}
-
+/* ===== ELEMENT DECLARATION ===== */
 const homepage=document.getElementById('homepage');
 const detailsPage=document.getElementById('details-page');
 const categoryContainer=document.getElementById('category-container');
@@ -167,16 +155,18 @@ const videoPlayer=document.getElementById('videoPlayer');
 const videoTitle=document.getElementById('videoTitle');
 const episodeList=document.getElementById('episodeList');
 const logoutButton=document.getElementById('logoutButton');
+const blocked=document.getElementById('blocked');
+const appContent=document.getElementById('app-content');
 
-logoutButton.addEventListener('click',()=>{
-sessionStorage.removeItem('isLoggedIn');
-location.reload();
-});
+/* ===== FUNCTIONS ===== */
 
 function showPage(page){
 homepage.style.display=page==='home'?'block':'none';
 detailsPage.style.display=page==='details'?'block':'none';
-if(page==='home'){videoPlayer.pause();videoPlayer.src="";}
+if(page==='home'){
+videoPlayer.pause();
+videoPlayer.src="";
+}
 }
 
 async function apiCall(endpoint, lang='in'){
@@ -230,7 +220,6 @@ videoTitle.textContent=title;
 episodeList.innerHTML='Memuatkan episod...';
 
 const response=await apiCall(`/dramabox/api/v1/chapters/${bookId}`);
-
 if(response?.data?.chapterList){
 displayEpisodes(response.data.chapterList,bookId);
 if(response.data.chapterList.length>0){
@@ -268,6 +257,30 @@ videoPlayer.addEventListener('ended',()=>{
 const current=parseInt(videoPlayer.dataset.currentEpisodeIndex);
 const next=document.querySelector(`[data-index='${current+1}']`);
 if(next) next.click();
+});
+
+logoutButton.addEventListener('click',()=>{
+sessionStorage.removeItem('isLoggedIn');
+location.reload();
+});
+
+/* ===== ACCESS SYSTEM (LAST) ===== */
+
+const params=new URLSearchParams(window.location.search);
+
+if(params.get("access")===ACCESS_KEY){
+sessionStorage.setItem("isLoggedIn","true");
+history.replaceState({},document.title,window.location.pathname);
+}
+
+if(sessionStorage.getItem("isLoggedIn")==="true"){
+blocked.style.display="none";
+appContent.style.display="block";
+loadAllCategories();
+}else{
+blocked.style.display="flex";
+}
+
 });
 </script>
 
