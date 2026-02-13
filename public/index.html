@@ -7,86 +7,102 @@
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap');
-:root {
---brand-color:#E50914;
---background-color:#0b0b0f;
---surface-color:#1a1a21;
---text-primary:#ffffff;
---text-secondary:#b3b3b3;
+
+:root{
+--brand:#E50914;
+--bg:#0b0b0f;
+--surface:#1a1a21;
+--text:#ffffff;
+--muted:#b3b3b3;
 }
+
 body{
 font-family:'Poppins',sans-serif;
-background:var(--background-color);
-color:var(--text-primary);
+background:var(--bg);
+color:var(--text);
 margin:0;
 }
+
 header{
 padding:20px 4%;
 display:flex;
 justify-content:space-between;
 align-items:center;
 }
+
 h1{
 background:linear-gradient(90deg,#f40612,#E50914,#d10811);
 -webkit-background-clip:text;
 -webkit-text-fill-color:transparent;
-font-size:2em;
 margin:0;
 }
+
 #logoutButton{
 background:none;
-border:1px solid var(--text-secondary);
-color:var(--text-secondary);
+border:1px solid var(--muted);
+color:var(--muted);
 padding:6px 12px;
 cursor:pointer;
 }
+
 .container{padding:0 4%;}
+
 .category-section{margin-bottom:40px;}
+
 .drama-grid{
 display:flex;
 overflow-x:auto;
 gap:15px;
 }
+
 .drama-card{
 flex:0 0 180px;
-background:var(--surface-color);
+background:var(--surface);
 border-radius:8px;
 overflow:hidden;
 cursor:pointer;
 }
+
 .drama-card img{
 width:100%;
 height:250px;
 object-fit:cover;
 }
+
 .drama-card-title{
 padding:10px;
 white-space:nowrap;
 overflow:hidden;
 text-overflow:ellipsis;
 }
+
 #details-page{display:none;}
+
 #videoPlayer{
 width:100%;
 max-width:900px;
 background:#000;
 border-radius:8px;
 }
+
 .episode-list{
 display:grid;
 grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
 gap:10px;
 margin-top:20px;
 }
+
 .episode-item{
 background:#282828;
 padding:12px;
 text-align:center;
 cursor:pointer;
 }
+
 .episode-item.playing{
-background:var(--brand-color);
+background:var(--brand);
 }
+
 #blocked{
 display:flex;
 height:100vh;
@@ -132,11 +148,16 @@ const config={ apiBaseUrl:"/api/proxy" };
 
 const params=new URLSearchParams(window.location.search);
 
-if(params.get("access")===ACCESS_KEY || sessionStorage.getItem("isLoggedIn")==="true"){
+/* ACCESS SYSTEM FIX */
+if(params.get("access")===ACCESS_KEY){
 sessionStorage.setItem("isLoggedIn","true");
+history.replaceState({},document.title,window.location.pathname);
+location.reload();
+}
+
+if(sessionStorage.getItem("isLoggedIn")==="true"){
 document.getElementById("blocked").style.display="none";
 document.getElementById("app-content").style.display="block";
-history.replaceState({},document.title,window.location.pathname);
 loadAllCategories();
 }else{
 document.getElementById("blocked").style.display="flex";
@@ -155,10 +176,10 @@ sessionStorage.removeItem('isLoggedIn');
 location.reload();
 });
 
-function showPage(pageName){
-homepage.style.display=pageName==='home'?'block':'none';
-detailsPage.style.display=pageName==='details'?'block':'none';
-if(pageName==='home'){videoPlayer.pause();videoPlayer.src="";}
+function showPage(page){
+homepage.style.display=page==='home'?'block':'none';
+detailsPage.style.display=page==='details'?'block':'none';
+if(page==='home'){videoPlayer.pause();videoPlayer.src="";}
 }
 
 async function apiCall(endpoint, lang='in'){
@@ -182,6 +203,7 @@ card.innerHTML=`<img src="${drama.cover}">
 card.onclick=()=>showDetailsPage(drama.bookId,drama.bookName);
 grid.appendChild(card);
 });
+
 categoryContainer.appendChild(section);
 }
 
@@ -211,6 +233,7 @@ videoTitle.textContent=title;
 episodeList.innerHTML='Memuatkan episod...';
 
 const response=await apiCall(`/dramabox/api/v1/chapters/${bookId}`);
+
 if(response?.data?.chapterList){
 displayEpisodes(response.data.chapterList,bookId);
 if(response.data.chapterList.length>0){
