@@ -7,17 +7,17 @@
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap');
-:root{
---brand:#E50914;
---bg:#0b0b0f;
---surface:#1a1a21;
---text:#fff;
---muted:#b3b3b3;
+:root {
+--brand-color:#E50914;
+--background-color:#0b0b0f;
+--surface-color:#1a1a21;
+--text-primary:#ffffff;
+--text-secondary:#b3b3b3;
 }
 body{
-font-family:Poppins;
-background:var(--bg);
-color:var(--text);
+font-family:'Poppins',sans-serif;
+background:var(--background-color);
+color:var(--text-primary);
 margin:0;
 }
 header{
@@ -27,14 +27,17 @@ justify-content:space-between;
 align-items:center;
 }
 h1{
-color:var(--brand);
+background:linear-gradient(90deg,#f40612,#E50914,#d10811);
+-webkit-background-clip:text;
+-webkit-text-fill-color:transparent;
+font-size:2em;
 margin:0;
 }
-button{
-background:var(--brand);
-border:none;
-color:#fff;
-padding:8px 14px;
+#logoutButton{
+background:none;
+border:1px solid var(--text-secondary);
+color:var(--text-secondary);
+padding:6px 12px;
 cursor:pointer;
 }
 .container{padding:0 4%;}
@@ -46,7 +49,7 @@ gap:15px;
 }
 .drama-card{
 flex:0 0 180px;
-background:var(--surface);
+background:var(--surface-color);
 border-radius:8px;
 overflow:hidden;
 cursor:pointer;
@@ -71,7 +74,7 @@ border-radius:8px;
 }
 .episode-list{
 display:grid;
-grid-template-columns:repeat(auto-fill,minmax(120px,1fr));
+grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
 gap:10px;
 margin-top:20px;
 }
@@ -82,13 +85,13 @@ text-align:center;
 cursor:pointer;
 }
 .episode-item.playing{
-background:var(--brand);
+background:var(--brand-color);
 }
 #blocked{
 display:flex;
 height:100vh;
-align-items:center;
 justify-content:center;
+align-items:center;
 flex-direction:column;
 background:#000;
 }
@@ -102,26 +105,21 @@ background:#000;
 <p>Gunakan link khas untuk masuk.</p>
 </div>
 
-<div id="app" style="display:none">
-
+<div id="app-content" style="display:none;">
 <div class="container">
 
+<div id="homepage">
 <header>
 <h1>Koroi Drama</h1>
-<div>
-<button onclick="loadAllCategories()">Home</button>
-<button onclick="logout()">Logout</button>
-</div>
+<button id="logoutButton">Log Keluar</button>
 </header>
-
-<div id="homepage">
 <main id="category-container"></main>
 </div>
 
 <div id="details-page">
 <button onclick="loadAllCategories()">← Kembali</button>
 <h2 id="videoTitle"></h2>
-<video id="videoPlayer" controls></video>
+<video id="videoPlayer" controls controlsList="nodownload"></video>
 <div class="episode-list" id="episodeList"></div>
 </div>
 
@@ -130,37 +128,66 @@ background:#000;
 
 <script>
 const ACCESS_KEY="koroi2026";
-const apiBase="/api/proxy";
+const config={ apiBaseUrl:"/api/proxy" };
 
 const params=new URLSearchParams(window.location.search);
-if(params.get("access")===ACCESS_KEY || sessionStorage.getItem("access")==="true"){
-sessionStorage.setItem("access","true");
+
+if(params.get("access")===ACCESS_KEY || sessionStorage.getItem("isLoggedIn")==="true"){
+sessionStorage.setItem("isLoggedIn","true");
 document.getElementById("blocked").style.display="none";
-document.getElementById("app").style.display="block";
+document.getElementById("app-content").style.display="block";
 history.replaceState({},document.title,window.location.pathname);
 loadAllCategories();
 }else{
 document.getElementById("blocked").style.display="flex";
 }
 
-function buildUrl(endpoint){
-if(endpoint.includes("?")){
-return `https://captain.sapimu.au${endpoint}&lang=in`;
-}else{
-return `https://captain.sapimu.au${endpoint}?lang=in`;
-}
+const homepage=document.getElementById('homepage');
+const detailsPage=document.getElementById('details-page');
+const categoryContainer=document.getElementById('category-container');
+const videoPlayer=document.getElementById('videoPlayer');
+const videoTitle=document.getElementById('videoTitle');
+const episodeList=document.getElementById('episodeList');
+const logoutButton=document.getElementById('logoutButton');
+
+logoutButton.addEventListener('click',()=>{
+sessionStorage.removeItem('isLoggedIn');
+location.reload();
+});
+
+function showPage(pageName){
+homepage.style.display=pageName==='home'?'block':'none';
+detailsPage.style.display=pageName==='details'?'block':'none';
+if(pageName==='home'){videoPlayer.pause();videoPlayer.src="";}
 }
 
-async function apiCall(endpoint){
-const target=buildUrl(endpoint);
-const res=await fetch(`${apiBase}?url=${encodeURIComponent(target)}`);
-return await res.json();
+async function apiCall(endpoint, lang='in'){
+const targetUrl=`https://captain.sapimu.au${endpoint}?lang=${lang}`;
+const proxyUrl=`${config.apiBaseUrl}?url=${encodeURIComponent(targetUrl)}`;
+const response=await fetch(proxyUrl);
+return await response.json();
+}
+
+function displayCategory(title,dramas){
+const section=document.createElement('section');
+section.className='category-section';
+section.innerHTML=`<h2>${title}</h2><div class="drama-grid"></div>`;
+const grid=section.querySelector('.drama-grid');
+
+dramas.forEach(drama=>{
+const card=document.createElement('div');
+card.className='drama-card';
+card.innerHTML=`<img src="${drama.cover}">
+<div class="drama-card-title">${drama.bookName}</div>`;
+card.onclick=()=>showDetailsPage(drama.bookId,drama.bookName);
+grid.appendChild(card);
+});
+categoryContainer.appendChild(section);
 }
 
 async function loadAllCategories(){
-document.getElementById("homepage").style.display="block";
-document.getElementById("details-page").style.display="none";
-document.getElementById("category-container").innerHTML="Memuatkan...";
+showPage('home');
+categoryContainer.innerHTML='Memuatkan...';
 
 const categories=[
 {title:"Terbaru",endpoint:"/dramabox/api/v1/new/1?pageSize=20"},
@@ -168,10 +195,9 @@ const categories=[
 {title:"Mesti Tonton",endpoint:"/dramabox/api/v1/classify?pageSize=20&sort=1"}
 ];
 
-const responses=await Promise.all(categories.map(c=>apiCall(c.endpoint)));
+const responses=await Promise.all(categories.map(cat=>apiCall(cat.endpoint)));
 
-document.getElementById("category-container").innerHTML="";
-
+categoryContainer.innerHTML='';
 responses.forEach((res,i)=>{
 if(res?.data?.list){
 displayCategory(categories[i].title,res.data.list);
@@ -179,76 +205,50 @@ displayCategory(categories[i].title,res.data.list);
 });
 }
 
-function displayCategory(title,dramas){
-const section=document.createElement("section");
-section.className="category-section";
-section.innerHTML=`<h2>${title}</h2><div class="drama-grid"></div>`;
-const grid=section.querySelector(".drama-grid");
-
-dramas.forEach(drama=>{
-const card=document.createElement("div");
-card.className="drama-card";
-card.innerHTML=`<img src="${drama.cover}">
-<div class="drama-card-title">${drama.bookName}</div>`;
-card.onclick=()=>showDetailsPage(drama.bookId,drama.bookName);
-grid.appendChild(card);
-});
-
-document.getElementById("category-container").appendChild(section);
-}
-
 async function showDetailsPage(bookId,title){
-document.getElementById("homepage").style.display="none";
-document.getElementById("details-page").style.display="block";
-document.getElementById("videoTitle").textContent=title;
+showPage('details');
+videoTitle.textContent=title;
+episodeList.innerHTML='Memuatkan episod...';
 
-const res=await apiCall(`/dramabox/api/v1/chapters/${bookId}`);
-if(res?.data?.chapterList){
-displayEpisodes(res.data.chapterList,bookId);
-if(res.data.chapterList.length>0){
-playVideo(bookId,res.data.chapterList[0].chapterIndex);
+const response=await apiCall(`/dramabox/api/v1/chapters/${bookId}`);
+if(response?.data?.chapterList){
+displayEpisodes(response.data.chapterList,bookId);
+if(response.data.chapterList.length>0){
+playVideo(bookId,response.data.chapterList[0].chapterIndex);
 }
 }
 }
 
 function displayEpisodes(episodes,bookId){
-const list=document.getElementById("episodeList");
-list.innerHTML="";
+episodeList.innerHTML='';
 episodes.forEach(ep=>{
-const div=document.createElement("div");
-div.className="episode-item";
-div.textContent="Episod "+(ep.chapterIndex+1);
-div.dataset.index=ep.chapterIndex;
-div.onclick=()=>playVideo(bookId,ep.chapterIndex);
-list.appendChild(div);
+const item=document.createElement('div');
+item.className='episode-item';
+item.textContent=`Episod ${ep.chapterIndex+1}`;
+item.dataset.index=ep.chapterIndex;
+item.onclick=()=>playVideo(bookId,ep.chapterIndex);
+episodeList.appendChild(item);
 });
 }
 
 async function playVideo(bookId,index){
-const res=await apiCall(`/dramabox/api/v1/watch/${bookId}/${index}`);
-if(res?.data?.videoUrl){
-const video=document.getElementById("videoPlayer");
-video.src=res.data.videoUrl;
-video.play();
+const response=await apiCall(`/dramabox/api/v1/watch/${bookId}/${index}`);
+if(response?.data?.videoUrl){
+videoPlayer.src=response.data.videoUrl;
+videoPlayer.play();
+videoPlayer.dataset.currentEpisodeIndex=index;
 
-video.dataset.currentEpisodeIndex=index;
-
-document.querySelectorAll(".episode-item").forEach(i=>i.classList.remove("playing"));
+document.querySelectorAll('.episode-item').forEach(i=>i.classList.remove('playing'));
 const current=document.querySelector(`[data-index='${index}']`);
-if(current) current.classList.add("playing");
+if(current) current.classList.add('playing');
 }
 }
 
-document.getElementById("videoPlayer").addEventListener("ended",()=>{
-const current=parseInt(document.getElementById("videoPlayer").dataset.currentEpisodeIndex);
+videoPlayer.addEventListener('ended',()=>{
+const current=parseInt(videoPlayer.dataset.currentEpisodeIndex);
 const next=document.querySelector(`[data-index='${current+1}']`);
 if(next) next.click();
 });
-
-function logout(){
-sessionStorage.removeItem("access");
-location.reload();
-}
 </script>
 
 </body>
