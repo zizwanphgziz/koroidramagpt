@@ -46,7 +46,6 @@ cursor:pointer;
 }
 
 .container{padding:0 4%;}
-
 .category-section{margin-bottom:40px;}
 
 .drama-grid{
@@ -148,11 +147,9 @@ const config={ apiBaseUrl:"/api/proxy" };
 
 const params=new URLSearchParams(window.location.search);
 
-/* ACCESS SYSTEM FIX */
 if(params.get("access")===ACCESS_KEY){
 sessionStorage.setItem("isLoggedIn","true");
 history.replaceState({},document.title,window.location.pathname);
-location.reload();
 }
 
 if(sessionStorage.getItem("isLoggedIn")==="true"){
