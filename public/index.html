@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Koroi Drama</title>
-
 <link rel="icon" href="https://i.imgur.com/MC7KXb2.png">
 
 <style>
@@ -13,6 +12,7 @@
 :root{
 --primary:#ff1e1e;
 --bg:#050b18;
+--card:#111c2e;
 }
 
 body{
@@ -23,19 +23,28 @@ color:#fff;
 overflow-x:hidden;
 }
 
-/* BACKGROUND ROTATE LOGO */
+/* ===== Background Rotating Logo ===== */
+
 .bg-logo{
 position:fixed;
 top:50%;
 left:50%;
 width:500px;
-opacity:0.06;
+opacity:0.05;
 transform:translate(-50%,-50%);
-animation:spin 40s linear infinite,fade 6s ease-in-out infinite;
+animation:spin 50s linear infinite,fade 6s ease-in-out infinite;
 z-index:-1;
 }
-@keyframes spin{from{transform:translate(-50%,-50%) rotate(0)}to{transform:translate(-50%,-50%) rotate(360deg)}}
-@keyframes fade{0%,100%{opacity:.04}50%{opacity:.08}}
+@keyframes spin{
+from{transform:translate(-50%,-50%) rotate(0)}
+to{transform:translate(-50%,-50%) rotate(360deg)}
+}
+@keyframes fade{
+0%,100%{opacity:.04}
+50%{opacity:.08}
+}
+
+/* ===== Header ===== */
 
 header{
 display:flex;
@@ -72,16 +81,18 @@ font-weight:600;
 cursor:pointer;
 }
 
-/* HERO */
+/* ===== HERO ===== */
+
 .hero{
 margin:20px;
 border-radius:25px;
 overflow:hidden;
 position:relative;
 height:420px;
+background:#000;
 }
 
-.hero img{
+.hero video{
 width:100%;
 height:100%;
 object-fit:cover;
@@ -97,10 +108,10 @@ background:linear-gradient(to top,#000,transparent);
 }
 
 .hero-title{
-font-size:1.8rem;
+font-size:1.6rem;
 font-weight:800;
-margin-bottom:10px;
-max-height:70px;
+margin-bottom:8px;
+max-height:60px;
 overflow:hidden;
 }
 
@@ -122,7 +133,8 @@ font-weight:600;
 cursor:pointer;
 }
 
-/* CATEGORY */
+/* ===== CATEGORY ===== */
+
 .section{
 padding:0 20px 30px;
 }
@@ -131,25 +143,27 @@ padding:0 20px 30px;
 margin:25px 0 15px;
 }
 
+/* HORIZONTAL NETFLIX STYLE */
 .drama-grid{
-display:grid;
-grid-template-columns:repeat(2,1fr);
-gap:15px;
+display:flex;
+gap:16px;
+overflow-x:auto;
+scroll-snap-type:x mandatory;
+padding-bottom:10px;
 }
 
-@media(min-width:768px){
-.drama-grid{grid-template-columns:repeat(3,1fr);}
+.drama-grid::-webkit-scrollbar{
+display:none;
 }
 
-@media(min-width:1200px){
-.drama-grid{grid-template-columns:repeat(4,1fr);}
-}
-
+/* CARD STANDARD FRAME */
 .drama-card{
-background:#111c2e;
+flex:0 0 180px;
+background:var(--card);
 border-radius:18px;
 overflow:hidden;
 cursor:pointer;
+scroll-snap-align:start;
 transition:.3s;
 display:flex;
 flex-direction:column;
@@ -170,11 +184,50 @@ object-fit:cover;
 padding:10px;
 text-align:center;
 font-weight:600;
-min-height:50px;
+font-size:.9rem;
+line-height:1.3;
+min-height:48px;
 display:-webkit-box;
 -webkit-line-clamp:2;
 -webkit-box-orient:vertical;
 overflow:hidden;
+}
+
+/* ===== DETAILS PAGE ===== */
+
+#detailsPage{
+display:none;
+padding:20px;
+}
+
+#detailsPage video{
+width:100%;
+border-radius:16px;
+margin-bottom:15px;
+}
+
+.episode{
+background:#1f2638;
+padding:10px;
+border-radius:10px;
+margin-bottom:8px;
+cursor:pointer;
+}
+
+.backBtn{
+margin-bottom:15px;
+background:#333;
+padding:8px 16px;
+border:none;
+color:#fff;
+border-radius:20px;
+cursor:pointer;
+}
+
+@media(min-width:1200px){
+.drama-card{
+flex:0 0 220px;
+}
 }
 </style>
 </head>
@@ -190,8 +243,10 @@ overflow:hidden;
 <button class="logout-btn">Log Keluar</button>
 </header>
 
-<div class="hero" id="hero">
-<img id="heroImage">
+<div id="homePage">
+
+<div class="hero">
+<video id="heroVideo" muted autoplay playsinline></video>
 <div class="hero-content">
 <div class="hero-title" id="heroTitle"></div>
 <div class="hero-desc" id="heroDesc"></div>
@@ -200,12 +255,20 @@ overflow:hidden;
 </div>
 
 <div id="content"></div>
+</div>
+
+<div id="detailsPage">
+<button class="backBtn" onclick="goHome()">← Kembali</button>
+<h2 id="detailTitle"></h2>
+<video id="player" controls></video>
+<div id="episodes"></div>
+</div>
 
 <script>
 const apiBase="/api/proxy";
 let heroList=[];
 let heroIndex=0;
-let rotateInterval;
+let heroInterval;
 
 async function apiCall(endpoint){
 const target=`https://captain.sapimu.au${endpoint}?lang=in`;
@@ -213,63 +276,117 @@ const res=await fetch(`${apiBase}?url=${encodeURIComponent(target)}`);
 return res.json();
 }
 
-function createCard(drama){
-const div=document.createElement("div");
-div.className="drama-card";
-div.innerHTML=`
-<img src="${drama.cover}">
-<div class="drama-card-title">${drama.bookName}</div>
-`;
-div.onclick=()=>alert("Play "+drama.bookName);
-return div;
+async function loadHome(){
+
+const terbaru=await apiCall("/dramabox/api/v1/new/1?pageSize=20");
+const hangat=await apiCall("/dramabox/api/v1/rank/1?pageSize=20");
+const mesti=await apiCall("/dramabox/api/v1/classify?pageSize=20&sort=1");
+
+heroList=terbaru.data.list.slice(0,5);
+startHeroRotation();
+
+createSection("Terbaru", terbaru.data.list);
+createSection("Paling Hangat", hangat.data.list);
+createSection("Mesti Tonton", mesti.data.list);
 }
 
-async function loadCategories(){
+function createSection(title,list){
 const container=document.getElementById("content");
-container.innerHTML="";
 
-const categories=[
-{title:"Terbaru",endpoint:"/dramabox/api/v1/new/1?pageSize=12"},
-{title:"Paling Hangat",endpoint:"/dramabox/api/v1/rank/1?pageSize=12"},
-{title:"Mesti Tonton",endpoint:"/dramabox/api/v1/classify?pageSize=12&sort=1"}
-];
-
-for(const cat of categories){
-const data=await apiCall(cat.endpoint);
-if(data?.data?.list){
 const section=document.createElement("div");
 section.className="section";
-section.innerHTML=`<h2>${cat.title}</h2>`;
+section.innerHTML=`<h2>${title}</h2>`;
+
 const grid=document.createElement("div");
 grid.className="drama-grid";
-data.data.list.forEach(d=>grid.appendChild(createCard(d)));
+
+list.forEach(item=>{
+const card=document.createElement("div");
+card.className="drama-card";
+card.innerHTML=`
+<img src="${item.cover}">
+<div class="drama-card-title">${item.bookName}</div>
+`;
+card.onclick=()=>openDetails(item.bookId,item.bookName);
+grid.appendChild(card);
+});
+
 section.appendChild(grid);
 container.appendChild(section);
-
-if(heroList.length<5) heroList.push(...data.data.list.slice(0,2));
-}
-}
-startHeroRotation();
-}
-
-function updateHero(){
-const item=heroList[heroIndex];
-document.getElementById("heroImage").src=item.cover;
-document.getElementById("heroTitle").textContent=item.bookName;
-document.getElementById("heroDesc").textContent=item.introduction;
-document.getElementById("heroBtn").onclick=()=>alert("Play "+item.bookName);
 }
 
 function startHeroRotation(){
 updateHero();
-clearInterval(rotateInterval);
-rotateInterval=setInterval(()=>{
+clearInterval(heroInterval);
+heroInterval=setInterval(()=>{
 heroIndex=(heroIndex+1)%heroList.length;
 updateHero();
-},5000);
+},8000);
 }
 
-loadCategories();
+async function updateHero(){
+const item=heroList[heroIndex];
+
+document.getElementById("heroTitle").textContent=item.bookName;
+document.getElementById("heroDesc").textContent=item.introduction;
+document.getElementById("heroBtn").onclick=()=>openDetails(item.bookId,item.bookName);
+
+const watch=await apiCall(`/dramabox/api/v1/watch/${item.bookId}/0`);
+
+const heroVideo=document.getElementById("heroVideo");
+heroVideo.pause();
+heroVideo.src="";
+heroVideo.load();
+
+if(watch?.data?.videoUrl){
+heroVideo.src=watch.data.videoUrl;
+heroVideo.play().catch(()=>{});
+}
+}
+
+async function openDetails(bookId,title){
+clearInterval(heroInterval);
+
+document.getElementById("homePage").style.display="none";
+document.getElementById("detailsPage").style.display="block";
+
+document.getElementById("detailTitle").textContent=title;
+
+const chapters=await apiCall(`/dramabox/api/v1/chapters/${bookId}`);
+const list=chapters.data.chapterList;
+
+const episodes=document.getElementById("episodes");
+episodes.innerHTML="";
+
+list.forEach(ep=>{
+const div=document.createElement("div");
+div.className="episode";
+div.textContent="Episod "+(ep.chapterIndex+1);
+div.onclick=()=>playEpisode(bookId,ep.chapterIndex);
+episodes.appendChild(div);
+});
+
+if(list.length>0){
+playEpisode(bookId,0);
+}
+}
+
+async function playEpisode(bookId,index){
+const res=await apiCall(`/dramabox/api/v1/watch/${bookId}/${index}`);
+if(res?.data?.videoUrl){
+const player=document.getElementById("player");
+player.src=res.data.videoUrl;
+player.play().catch(()=>{});
+}
+}
+
+function goHome(){
+document.getElementById("detailsPage").style.display="none";
+document.getElementById("homePage").style.display="block";
+startHeroRotation();
+}
+
+loadHome();
 </script>
 
 </body>
