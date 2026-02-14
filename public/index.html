@@ -4,16 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Koroi Drama</title>
+
 <link rel="icon" href="https://i.imgur.com/MC7KXb2.png">
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap');
 
 :root{
---bg:#0b0f1a;
---card:#121826;
---red1:#ff003c;
---red2:#ff4b2b;
+--primary:#ff1e1e;
+--bg:#050b18;
 }
 
 body{
@@ -24,216 +23,161 @@ color:#fff;
 overflow-x:hidden;
 }
 
-/* ===== Background Logo ===== */
-
+/* BACKGROUND ROTATE LOGO */
 .bg-logo{
 position:fixed;
 top:50%;
 left:50%;
+width:500px;
+opacity:0.06;
 transform:translate(-50%,-50%);
-width:85vw;
-max-width:750px;
-opacity:0.05;
-z-index:0;
-pointer-events:none;
-animation:spinFade 60s linear infinite;
+animation:spin 40s linear infinite,fade 6s ease-in-out infinite;
+z-index:-1;
 }
-
-@keyframes spinFade{
-0%{transform:translate(-50%,-50%) rotate(0deg);opacity:0.04;}
-50%{opacity:0.09;}
-100%{transform:translate(-50%,-50%) rotate(360deg);opacity:0.04;}
-}
-
-/* ===== Header ===== */
+@keyframes spin{from{transform:translate(-50%,-50%) rotate(0)}to{transform:translate(-50%,-50%) rotate(360deg)}}
+@keyframes fade{0%,100%{opacity:.04}50%{opacity:.08}}
 
 header{
 display:flex;
 align-items:center;
 justify-content:space-between;
-padding:14px 20px;
-background:rgba(0,0,0,0.6);
-backdrop-filter:blur(8px);
-z-index:10;
-position:relative;
+padding:15px 18px;
+background:#000c;
+backdrop-filter:blur(10px);
 }
 
 .logo-wrap{
 display:flex;
 align-items:center;
-gap:14px;
+gap:10px;
 }
 
 .logo-wrap img{
-width:72px;
-height:72px;
-object-fit:contain;
-filter:drop-shadow(0 0 10px rgba(255,0,100,0.4));
+width:45px;
 }
 
-.brand-title{
-font-size:28px;
-font-weight:900;
-background:linear-gradient(90deg,#ff003c,#ff4b2b,#ff003c);
--webkit-background-clip:text;
--webkit-text-fill-color:transparent;
-letter-spacing:1px;
+.logo-title{
+font-size:1.4rem;
+font-weight:800;
+color:#ff2b2b;
 }
 
-#logoutButton{
-background:linear-gradient(90deg,#ff003c,#ff4b2b);
+.logout-btn{
+background:linear-gradient(45deg,#ff1e1e,#ff5e5e);
 border:none;
 color:#fff;
-padding:10px 20px;
-border-radius:40px;
-font-weight:700;
+padding:8px 16px;
+border-radius:10px;
+font-weight:600;
 cursor:pointer;
 }
 
-/* ===== Hero ===== */
-
+/* HERO */
 .hero{
-position:relative;
-margin:24px auto;
-width:90%;
-max-width:1100px;
-border-radius:24px;
+margin:20px;
+border-radius:25px;
 overflow:hidden;
-background:#000;
+position:relative;
+height:420px;
 }
 
-.hero video{
+.hero img{
 width:100%;
-height:260px;
+height:100%;
 object-fit:cover;
 }
 
 .hero-content{
 position:absolute;
-bottom:20px;
-left:20px;
-right:20px;
+bottom:0;
+left:0;
+right:0;
+padding:20px;
+background:linear-gradient(to top,#000,transparent);
 }
 
-.hero h1{
-font-size:22px;
-margin:0 0 8px;
+.hero-title{
+font-size:1.8rem;
+font-weight:800;
+margin-bottom:10px;
+max-height:70px;
+overflow:hidden;
+}
+
+.hero-desc{
+font-size:.9rem;
+opacity:.85;
+max-height:60px;
+overflow:hidden;
+}
+
+.hero-btn{
+margin-top:12px;
+background:var(--primary);
+padding:10px 18px;
+border:none;
+border-radius:12px;
+color:#fff;
+font-weight:600;
+cursor:pointer;
+}
+
+/* CATEGORY */
+.section{
+padding:0 20px 30px;
+}
+
+.section h2{
+margin:25px 0 15px;
+}
+
+.drama-grid{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:15px;
+}
+
+@media(min-width:768px){
+.drama-grid{grid-template-columns:repeat(3,1fr);}
+}
+
+@media(min-width:1200px){
+.drama-grid{grid-template-columns:repeat(4,1fr);}
+}
+
+.drama-card{
+background:#111c2e;
+border-radius:18px;
+overflow:hidden;
+cursor:pointer;
+transition:.3s;
+display:flex;
+flex-direction:column;
+}
+
+.drama-card:hover{
+transform:translateY(-6px);
+box-shadow:0 10px 25px #000;
+}
+
+.drama-card img{
+width:100%;
+aspect-ratio:3/4;
+object-fit:cover;
+}
+
+.drama-card-title{
+padding:10px;
+text-align:center;
+font-weight:600;
+min-height:50px;
 display:-webkit-box;
 -webkit-line-clamp:2;
 -webkit-box-orient:vertical;
 overflow:hidden;
 }
-
-.hero p{
-font-size:14px;
-opacity:0.85;
-margin:0 0 12px;
-display:-webkit-box;
--webkit-line-clamp:3;
--webkit-box-orient:vertical;
-overflow:hidden;
-}
-
-.hero button{
-background:linear-gradient(90deg,#ff003c,#ff4b2b);
-border:none;
-padding:10px 18px;
-border-radius:30px;
-color:#fff;
-font-weight:700;
-cursor:pointer;
-}
-
-/* ===== Sections ===== */
-
-.section{
-padding:24px 20px;
-position:relative;
-}
-
-.section h2{
-margin-bottom:14px;
-}
-
-.grid{
-display:flex;
-gap:16px;
-overflow-x:auto;
-scroll-snap-type:x mandatory;
-}
-
-.grid::-webkit-scrollbar{display:none;}
-
-/* ===== CARD FIX ===== */
-
-.card{
-min-width:170px;
-flex:0 0 auto;
-scroll-snap-align:start;
-background:var(--card);
-border-radius:18px;
-overflow:hidden;
-cursor:pointer;
-display:flex;
-flex-direction:column;
-transition:.25s;
-}
-
-.card img{
-width:100%;
-aspect-ratio:2/3;
-object-fit:contain;
-background:#000;
-display:block;
-}
-
-.card p{
-padding:12px 10px 14px;
-font-size:14px;
-text-align:center;
-line-height:1.3;
-word-wrap:break-word;
-white-space:normal;
-}
-
-/* ===== Details ===== */
-
-#detailsPage{
-display:none;
-padding:24px;
-}
-
-#detailsPage video{
-width:100%;
-border-radius:16px;
-margin-bottom:20px;
-}
-
-.episode{
-background:#1f2638;
-padding:10px;
-border-radius:10px;
-margin-bottom:8px;
-cursor:pointer;
-}
-
-.backBtn{
-margin-bottom:20px;
-background:#333;
-padding:8px 16px;
-border:none;
-color:#fff;
-border-radius:20px;
-cursor:pointer;
-}
-
-@media(min-width:768px){
-.hero video{height:380px;}
-.card{min-width:220px;}
-}
 </style>
 </head>
-
 <body>
 
 <img class="bg-logo" src="https://i.imgur.com/MC7KXb2.png">
@@ -241,140 +185,91 @@ cursor:pointer;
 <header>
 <div class="logo-wrap">
 <img src="https://i.imgur.com/MC7KXb2.png">
-<div class="brand-title">Koroi Drama</div>
+<div class="logo-title">Koroi Drama</div>
 </div>
-<button id="logoutButton">Log Keluar</button>
+<button class="logout-btn">Log Keluar</button>
 </header>
 
-<div id="homePage">
-
-<div class="hero">
-<video id="heroVideo" autoplay muted loop playsinline></video>
+<div class="hero" id="hero">
+<img id="heroImage">
 <div class="hero-content">
-<h1 id="heroTitle"></h1>
-<p id="heroDesc"></p>
-<button id="heroPlay">Tonton Sekarang</button>
+<div class="hero-title" id="heroTitle"></div>
+<div class="hero-desc" id="heroDesc"></div>
+<button class="hero-btn" id="heroBtn">Tonton Sekarang</button>
 </div>
 </div>
 
 <div id="content"></div>
 
-</div>
-
-<div id="detailsPage">
-<button class="backBtn" onclick="goHome()">← Kembali</button>
-<h2 id="detailTitle"></h2>
-<video id="player" controls></video>
-<div id="episodes"></div>
-</div>
-
 <script>
-
 const apiBase="/api/proxy";
 let heroList=[];
 let heroIndex=0;
-let heroInterval;
+let rotateInterval;
 
 async function apiCall(endpoint){
-const url=`${apiBase}?url=${encodeURIComponent("https://captain.sapimu.au"+endpoint+"?lang=in")}`;
-const res=await fetch(url);
+const target=`https://captain.sapimu.au${endpoint}?lang=in`;
+const res=await fetch(`${apiBase}?url=${encodeURIComponent(target)}`);
 return res.json();
 }
 
-async function loadHome(){
-
-const terbaru=await apiCall("/dramabox/api/v1/new/1?pageSize=20");
-const hangat=await apiCall("/dramabox/api/v1/rank/1?pageSize=20");
-const mesti=await apiCall("/dramabox/api/v1/classify?pageSize=20&sort=1");
-
-heroList=terbaru.data.list.slice(0,5);
-startHero();
-
-const content=document.getElementById("content");
-content.innerHTML="";
-
-createSection("Terbaru", terbaru.data.list);
-createSection("Paling Hangat", hangat.data.list);
-createSection("Mesti Tonton", mesti.data.list);
+function createCard(drama){
+const div=document.createElement("div");
+div.className="drama-card";
+div.innerHTML=`
+<img src="${drama.cover}">
+<div class="drama-card-title">${drama.bookName}</div>
+`;
+div.onclick=()=>alert("Play "+drama.bookName);
+return div;
 }
 
-function createSection(title,list){
+async function loadCategories(){
+const container=document.getElementById("content");
+container.innerHTML="";
+
+const categories=[
+{title:"Terbaru",endpoint:"/dramabox/api/v1/new/1?pageSize=12"},
+{title:"Paling Hangat",endpoint:"/dramabox/api/v1/rank/1?pageSize=12"},
+{title:"Mesti Tonton",endpoint:"/dramabox/api/v1/classify?pageSize=12&sort=1"}
+];
+
+for(const cat of categories){
+const data=await apiCall(cat.endpoint);
+if(data?.data?.list){
 const section=document.createElement("div");
 section.className="section";
-section.innerHTML=`<h2>${title}</h2><div class="grid"></div>`;
-const grid=section.querySelector(".grid");
+section.innerHTML=`<h2>${cat.title}</h2>`;
+const grid=document.createElement("div");
+grid.className="drama-grid";
+data.data.list.forEach(d=>grid.appendChild(createCard(d)));
+section.appendChild(grid);
+container.appendChild(section);
 
-list.forEach(item=>{
-const card=document.createElement("div");
-card.className="card";
-card.innerHTML=`<img src="${item.cover}"><p>${item.bookName}</p>`;
-card.onclick=()=>openDetails(item.bookId,item.bookName);
-grid.appendChild(card);
-});
-
-document.getElementById("content").appendChild(section);
+if(heroList.length<5) heroList.push(...data.data.list.slice(0,2));
+}
+}
+startHeroRotation();
 }
 
-function startHero(){
-updateHero();
-heroInterval=setInterval(updateHero,8000);
-}
-
-async function updateHero(){
+function updateHero(){
 const item=heroList[heroIndex];
-document.getElementById("heroTitle").innerText=item.bookName;
-document.getElementById("heroDesc").innerText=item.introduction;
-document.getElementById("heroPlay").onclick=()=>openDetails(item.bookId,item.bookName);
-
-const watch=await apiCall(`/dramabox/api/v1/watch/${item.bookId}/0`);
-if(watch?.data?.videoUrl){
-document.getElementById("heroVideo").src=watch.data.videoUrl;
+document.getElementById("heroImage").src=item.cover;
+document.getElementById("heroTitle").textContent=item.bookName;
+document.getElementById("heroDesc").textContent=item.introduction;
+document.getElementById("heroBtn").onclick=()=>alert("Play "+item.bookName);
 }
+
+function startHeroRotation(){
+updateHero();
+clearInterval(rotateInterval);
+rotateInterval=setInterval(()=>{
 heroIndex=(heroIndex+1)%heroList.length;
+updateHero();
+},5000);
 }
 
-async function openDetails(bookId,title){
-clearInterval(heroInterval);
-
-document.getElementById("homePage").style.display="none";
-document.getElementById("detailsPage").style.display="block";
-
-document.getElementById("detailTitle").innerText=title;
-
-const chapters=await apiCall(`/dramabox/api/v1/chapters/${bookId}`);
-const list=chapters.data.chapterList;
-
-const episodes=document.getElementById("episodes");
-episodes.innerHTML="";
-
-list.forEach(ep=>{
-const div=document.createElement("div");
-div.className="episode";
-div.innerText="Episod "+(ep.chapterIndex+1);
-div.onclick=()=>playEpisode(bookId,ep.chapterIndex);
-episodes.appendChild(div);
-});
-
-if(list.length>0){
-playEpisode(bookId,0);
-}
-}
-
-async function playEpisode(bookId,index){
-const res=await apiCall(`/dramabox/api/v1/watch/${bookId}/${index}`);
-if(res?.data?.videoUrl){
-document.getElementById("player").src=res.data.videoUrl;
-}
-}
-
-function goHome(){
-document.getElementById("detailsPage").style.display="none";
-document.getElementById("homePage").style.display="block";
-startHero();
-}
-
-loadHome();
-
+loadCategories();
 </script>
 
 </body>
