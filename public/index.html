@@ -16,6 +16,7 @@
 }
 
 *{box-sizing:border-box}
+
 body{
 margin:0;
 font-family:Poppins;
@@ -35,8 +36,16 @@ animation:spin 80s linear infinite,fade 12s ease-in-out infinite;
 pointer-events:none;
 z-index:-1;
 }
-@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
-@keyframes fade{0%,100%{opacity:.04}50%{opacity:.09}}
+
+@keyframes spin{
+from{transform:rotate(0)}
+to{transform:rotate(360deg)}
+}
+
+@keyframes fade{
+0%,100%{opacity:.04}
+50%{opacity:.09}
+}
 
 header{
 display:flex;
@@ -44,8 +53,17 @@ align-items:center;
 justify-content:space-between;
 padding:16px 5%;
 }
-.logo-wrap{display:flex;align-items:center;gap:14px}
-.logo-wrap img{width:80px}
+
+.logo-wrap{
+display:flex;
+align-items:center;
+gap:14px;
+}
+
+.logo-wrap img{
+width:80px;
+}
+
 .logo-text{
 font-size:26px;
 font-weight:800;
@@ -53,6 +71,7 @@ background:linear-gradient(90deg,#ff3d3d,#ff0000,#ff5c5c);
 -webkit-background-clip:text;
 -webkit-text-fill-color:transparent;
 }
+
 .btn{
 background:linear-gradient(90deg,#ff3d3d,#ff0000);
 border:none;
@@ -72,24 +91,33 @@ display:flex;
 align-items:flex-end;
 padding:40px 5%;
 }
+
 .hero video{
 position:absolute;
 inset:0;
 width:100%;
 height:100%;
 object-fit:cover;
+transition:opacity .8s ease-in-out;
 }
+
 .hero-overlay{
 position:absolute;
 inset:0;
 background:linear-gradient(to top,rgba(0,0,0,.9),rgba(0,0,0,.2));
 }
+
 .hero-content{
 position:relative;
 max-width:600px;
 z-index:2;
 }
-.hero-content h1{font-size:34px;margin-bottom:10px}
+
+.hero-content h1{
+font-size:34px;
+margin-bottom:10px;
+}
+
 .hero-content p{
 font-size:14px;
 line-height:1.6;
@@ -97,16 +125,27 @@ max-height:70px;
 overflow:hidden;
 }
 
-/* SECTIONS */
-.section{padding:30px 5%;position:relative}
-.section h2{margin-bottom:15px}
+/* Sections */
+.section{
+padding:30px 5%;
+position:relative;
+}
+
+.section h2{
+margin-bottom:15px;
+}
+
 .scroll-row{
 display:flex;
 gap:14px;
 overflow-x:auto;
 scroll-behavior:smooth;
 }
-.scroll-row::-webkit-scrollbar{display:none}
+
+.scroll-row::-webkit-scrollbar{
+display:none;
+}
+
 .scroll-btn{
 position:absolute;
 top:50%;
@@ -114,11 +153,13 @@ transform:translateY(-50%);
 background:rgba(0,0,0,.6);
 border:none;
 color:white;
-width:35px;height:35px;
+width:35px;
+height:35px;
 border-radius:50%;
 cursor:pointer;
 z-index:10;
 }
+
 .scroll-left{left:2%}
 .scroll-right{right:2%}
 
@@ -130,25 +171,35 @@ background:var(--card);
 border-radius:10px;
 overflow:hidden;
 cursor:pointer;
+position:relative;
 display:flex;
 flex-direction:column;
 }
+
 .card img{
 width:100%;
 height:240px;
 object-fit:cover;
+flex-shrink:0;
 }
+
 .card-title{
-padding:10px;
+padding:10px 8px 12px 8px;
 font-size:13px;
 text-align:center;
 line-height:1.4em;
+height:2.8em;
 display:-webkit-box;
--webkit-line-clamp:3;
+-webkit-line-clamp:2;
 -webkit-box-orient:vertical;
 overflow:hidden;
-min-height:4.2em;
 }
+
+.progress-bar{
+height:4px;
+background:var(--red);
+}
+
 .badge{
 position:absolute;
 top:8px;
@@ -158,61 +209,47 @@ padding:4px 8px;
 font-size:11px;
 border-radius:20px;
 }
-.progress-bar{
-height:4px;
-background:var(--red);
-}
 
-/* ================= DETAILS LAYOUT FIX ONLY ================= */
-
+/* DETAILS */
 .details{
 display:none;
 padding:30px 5%;
 }
 
-.details-container{
-display:flex;
-gap:40px;
-align-items:flex-start;
-}
-
 .video-wrap{
-flex:1;
+position:relative;
+max-width:900px;
+margin:auto;
 }
 
-.video-wrap video{
+video{
 width:100%;
-max-height:75vh;
-border-radius:10px;
-object-fit:contain;
-}
-
-.right-panel{
-flex:1;
+border-radius:8px;
 }
 
 .autoplay{
-margin:10px 0 15px 0;
+margin-top:10px;
 display:flex;
 gap:8px;
 align-items:center;
 }
 
 .episodes{
+margin-top:20px;
 display:grid;
-grid-template-columns:repeat(4,1fr);
-gap:10px;
-max-height:70vh;
+grid-template-columns:repeat(auto-fill,minmax(80px,1fr));
+gap:8px;
+max-height:300px;
 overflow-y:auto;
 }
 
 .ep-btn{
 background:#1e1e27;
-padding:10px;
+padding:8px;
 text-align:center;
-border-radius:6px;
+border-radius:4px;
 cursor:pointer;
-font-size:13px;
+font-size:12px;
 }
 
 .ep-btn.playing{
@@ -220,34 +257,48 @@ background:var(--red);
 color:white;
 font-weight:600;
 }
-
-/* MOBILE */
-@media(max-width:899px){
-
-.details-container{
-flex-direction:column;
-}
-
-.video-wrap video{
-max-height:55vh;
-}
-
-.episodes{
-grid-template-columns:repeat(3,1fr);
-max-height:35vh;
-}
-
-}
-
 </style>
 </head>
+
 <body>
 
-<!-- KEEP YOUR ORIGINAL SCRIPT BELOW EXACTLY AS IS -->
-<!-- DO NOT TOUCH JS ENGINE -->
+<header>
+<div class="logo-wrap">
+<img src="https://i.imgur.com/MC7KXb2.png">
+<div class="logo-text">Koroi Drama</div>
+</div>
+<button class="btn" onclick="logout()">Log Keluar</button>
+</header>
+
+<div id="homepage">
+<div class="hero">
+<video id="heroVideo" muted autoplay></video>
+<div class="hero-overlay"></div>
+<div class="hero-content">
+<h1 id="heroTitle"></h1>
+<p id="heroDesc"></p>
+<button class="btn" id="heroBtn">Tonton Sekarang</button>
+</div>
+</div>
+
+<div id="continueSection"></div>
+<div id="categoryContainer"></div>
+</div>
+
+<div id="detailsPage" class="details">
+<button class="btn" onclick="goHome()">← Kembali</button>
+<div class="video-wrap">
+<video id="player" controls controlsList="nodownload"></video>
+</div>
+<div class="autoplay">
+<input type="checkbox" id="autoplayToggle" checked>
+<label>Autoplay</label>
+</div>
+<div class="episodes" id="episodes"></div>
+</div>
 
 <script>
-/* ===== ENGINE EXACTLY SAME ===== */
+
 const API="/api/proxy";
 let heroList=[],heroIndex=0,heroTimer;
 let currentDrama=null,currentEpisode=0,totalEpisodes=0,currentCover="";
@@ -270,6 +321,7 @@ document.getElementById("heroBtn").onclick=()=>openDetails(item.bookId,0,0,item.
 
 const heroVideo=document.getElementById("heroVideo");
 const watch=await apiCall(`/dramabox/api/v1/watch/${item.bookId}/0`);
+
 if(watch?.data?.videoUrl){
 heroVideo.src=watch.data.videoUrl;
 heroVideo.play().catch(()=>{});
@@ -284,8 +336,10 @@ updateHero();
 },8000);
 }
 
-/* Continue Watching */
-function getContinue(){return JSON.parse(localStorage.getItem("continueWatching")||"[]")}
+function getContinue(){
+return JSON.parse(localStorage.getItem("continueWatching")||"[]");
+}
+
 function saveContinue(data){
 let list=getContinue().filter(x=>x.bookId!==data.bookId);
 list.unshift(data);
@@ -298,7 +352,13 @@ const section=document.getElementById("continueSection");
 const list=getContinue();
 if(!list.length){section.innerHTML="";return;}
 
-section.innerHTML=`<div class="section"><h2>Continue Watching</h2><div class="scroll-row"></div></div>`;
+section.innerHTML=`
+<div class="section">
+<h2>Continue Watching</h2>
+<div class="scroll-row"></div>
+</div>
+`;
+
 const row=section.querySelector(".scroll-row");
 
 list.forEach(item=>{
@@ -316,15 +376,18 @@ row.appendChild(card);
 });
 }
 
-/* Categories */
 function createSection(title,list){
 const container=document.getElementById("categoryContainer");
 const sec=document.createElement("div");
 sec.className="section";
-sec.innerHTML=`<h2>${title}</h2>
+
+sec.innerHTML=`
+<h2>${title}</h2>
 <button class="scroll-btn scroll-left">‹</button>
 <button class="scroll-btn scroll-right">›</button>
-<div class="scroll-row"></div>`;
+<div class="scroll-row"></div>
+`;
+
 const row=sec.querySelector(".scroll-row");
 
 list.forEach(item=>{
@@ -341,12 +404,14 @@ row.appendChild(card);
 
 sec.querySelector(".scroll-left").onclick=()=>row.scrollBy({left:-300,behavior:"smooth"});
 sec.querySelector(".scroll-right").onclick=()=>row.scrollBy({left:300,behavior:"smooth"});
+
 container.appendChild(sec);
 }
 
 async function loadAll(){
 const container=document.getElementById("categoryContainer");
 container.innerHTML="";
+
 const terbaru=await apiCall("/dramabox/api/v1/new/1?pageSize=20");
 const hot=await apiCall("/dramabox/api/v1/rank/1?pageSize=20");
 const must=await apiCall("/dramabox/api/v1/classify?pageSize=20&sort=1");
@@ -357,19 +422,22 @@ startHero();
 createSection("Terbaru",terbaru.data.list);
 createSection("Paling Hangat",hot.data.list);
 createSection("Mesti Tonton",must.data.list);
+
 renderContinue();
 }
 
-/* DETAILS */
 async function openDetails(id,ep=0,savedTime=0,cover=""){
 showPage("details");
+
 currentDrama=id;
 currentEpisode=ep;
 currentCover=cover;
+
 document.getElementById("autoplayToggle").checked=true;
 
 const chapters=await apiCall(`/dramabox/api/v1/chapters/${id}`);
 totalEpisodes=chapters.data.chapterList.length;
+
 const wrap=document.getElementById("episodes");
 wrap.innerHTML="";
 
@@ -387,8 +455,10 @@ playEpisode(ep,savedTime);
 
 async function playEpisode(index,savedTime=0){
 currentEpisode=index;
+
 const watch=await apiCall(`/dramabox/api/v1/watch/${currentDrama}/${index}`);
 const player=document.getElementById("player");
+
 player.src=watch.data.videoUrl;
 
 player.onloadedmetadata=()=>{
@@ -398,6 +468,7 @@ if(savedTime>0) player.currentTime=savedTime;
 player.play();
 
 document.querySelectorAll(".ep-btn").forEach(btn=>btn.classList.remove("playing"));
+
 const active=document.querySelector(`.ep-btn[data-index="${index}"]`);
 if(active) active.classList.add("playing");
 
@@ -429,10 +500,13 @@ player.src="";
 showPage("home");
 }
 
-function logout(){location.reload()}
+function logout(){
+location.reload();
+}
 
 loadAll();
 showPage("home");
+
 </script>
 </body>
 </html>
