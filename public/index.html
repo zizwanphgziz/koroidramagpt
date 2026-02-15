@@ -78,7 +78,6 @@ inset:0;
 width:100%;
 height:100%;
 object-fit:cover;
-opacity:1;
 transition:opacity .8s ease-in-out;
 }
 .hero video.fade-out{opacity:0}
@@ -133,8 +132,6 @@ border-radius:8px;
 overflow:hidden;
 position:relative;
 cursor:pointer;
-display:flex;
-flex-direction:column;
 }
 .card img{
 width:100%;
@@ -150,6 +147,7 @@ display:-webkit-box;
 -webkit-line-clamp:2;
 -webkit-box-orient:vertical;
 overflow:hidden;
+word-break:break-word;
 }
 .badge{
 position:absolute;
@@ -193,3 +191,241 @@ font-weight:600;
 }
 </style>
 </head>
+
+<body>
+
+<header>
+<div class="logo-wrap">
+<img src="https://i.imgur.com/MC7KXb2.png">
+<div class="logo-text">Koroi Drama</div>
+</div>
+<button class="btn" onclick="logout()">Log Keluar</button>
+</header>
+
+<div id="homepage">
+<div class="hero">
+<video id="heroVideo" muted autoplay></video>
+<div class="hero-overlay"></div>
+<div class="hero-content">
+<h1 id="heroTitle"></h1>
+<p id="heroDesc"></p>
+<button class="btn" id="heroBtn">Tonton Sekarang</button>
+</div>
+</div>
+
+<div id="continueSection"></div>
+<div id="categoryContainer"></div>
+</div>
+
+<div id="detailsPage" class="details">
+<button class="btn" onclick="goHome()">← Kembali</button>
+<div class="video-wrap">
+<video id="player" controls controlsList="nodownload"></video>
+</div>
+<div class="autoplay">
+<input type="checkbox" id="autoplayToggle" checked>
+<label>Autoplay</label>
+</div>
+<div class="episodes" id="episodes"></div>
+</div>
+
+<script>
+const API="/api/proxy";
+let heroList=[],heroIndex=0,heroTimer;
+let currentDrama=null,currentEpisode=0,totalEpisodes=0,currentCover="";
+
+/* PAGE SWITCH */
+function showPage(page){
+document.getElementById("homepage").style.display=page==="home"?"block":"none";
+document.getElementById("detailsPage").style.display=page==="details"?"block":"none";
+}
+
+/* API */
+async function apiCall(endpoint){
+const r=await fetch(`${API}?url=${encodeURIComponent("https://captain.sapimu.au"+endpoint+"?lang=in")}`);
+return r.json();
+}
+
+/* HERO */
+async function updateHero(){
+const item=heroList[heroIndex];
+document.getElementById("heroTitle").textContent=item.bookName;
+document.getElementById("heroDesc").textContent=item.introduction;
+document.getElementById("heroBtn").onclick=()=>openDetails(item.bookId,0,0,item.cover);
+
+const heroVideo=document.getElementById("heroVideo");
+heroVideo.classList.add("fade-out");
+
+setTimeout(async ()=>{
+const watch=await apiCall(`/dramabox/api/v1/watch/${item.bookId}/0`);
+heroVideo.pause();heroVideo.src="";heroVideo.load();
+if(watch?.data?.videoUrl){
+heroVideo.src=watch.data.videoUrl;
+heroVideo.onloadeddata=()=>{
+heroVideo.classList.remove("fade-out");
+heroVideo.play().catch(()=>{});
+};
+}
+},400);
+}
+
+function startHero(){
+updateHero();
+heroTimer=setInterval(()=>{
+heroIndex=(heroIndex+1)%heroList.length;
+updateHero();
+},8000);
+}
+
+/* CONTINUE WATCHING */
+function getContinue(){return JSON.parse(localStorage.getItem("continueWatching")||"[]")}
+function saveContinue(data){
+let list=getContinue().filter(x=>x.bookId!==data.bookId);
+list.unshift(data);
+localStorage.setItem("continueWatching",JSON.stringify(list.slice(0,10)));
+renderContinue();
+}
+
+function renderContinue(){
+const section=document.getElementById("continueSection");
+const list=getContinue();
+if(!list.length){section.innerHTML="";return;}
+
+section.innerHTML=`<div class="section"><h2>Continue Watching</h2><div class="scroll-row"></div></div>`;
+const row=section.querySelector(".scroll-row");
+
+list.forEach(item=>{
+const percent=item.duration?((item.currentTime/item.duration)*100):0;
+const card=document.createElement("div");
+card.className="card";
+card.innerHTML=`
+<div class="badge">Episode ${item.episode}/${item.total}</div>
+<img src="${item.cover}">
+<div class="progress-bar" style="width:${percent}%"></div>
+<div class="card-title">${item.title}</div>
+`;
+card.onclick=()=>openDetails(item.bookId,item.episode-1,item.currentTime,item.cover);
+row.appendChild(card);
+});
+}
+
+/* CATEGORY */
+function createSection(title,list){
+const container=document.getElementById("categoryContainer");
+const sec=document.createElement("div");
+sec.className="section";
+sec.innerHTML=`<h2>${title}</h2>
+<button class="scroll-btn scroll-left">‹</button>
+<button class="scroll-btn scroll-right">›</button>
+<div class="scroll-row"></div>`;
+const row=sec.querySelector(".scroll-row");
+
+list.forEach(item=>{
+const card=document.createElement("div");
+card.className="card";
+card.innerHTML=`
+<div class="badge">${item.chapterCount} Episod</div>
+<img src="${item.cover}">
+<div class="card-title">${item.bookName}</div>
+`;
+card.onclick=()=>openDetails(item.bookId,0,0,item.cover);
+row.appendChild(card);
+});
+
+sec.querySelector(".scroll-left").onclick=()=>row.scrollBy({left:-300,behavior:"smooth"});
+sec.querySelector(".scroll-right").onclick=()=>row.scrollBy({left:300,behavior:"smooth"});
+container.appendChild(sec);
+}
+
+async function loadAll(){
+const container=document.getElementById("categoryContainer");
+container.innerHTML="";
+const terbaru=await apiCall("/dramabox/api/v1/new/1?pageSize=20");
+const hot=await apiCall("/dramabox/api/v1/rank/1?pageSize=20");
+const must=await apiCall("/dramabox/api/v1/classify?pageSize=20&sort=1");
+
+heroList=terbaru.data.list.slice(0,5);
+startHero();
+
+createSection("Terbaru",terbaru.data.list);
+createSection("Paling Hangat",hot.data.list);
+createSection("Mesti Tonton",must.data.list);
+renderContinue();
+}
+
+/* DETAILS */
+async function openDetails(id,ep=0,savedTime=0,cover=""){
+showPage("details");
+currentDrama=id;
+currentEpisode=ep;
+currentCover=cover;
+document.getElementById("autoplayToggle").checked=true;
+
+const chapters=await apiCall(`/dramabox/api/v1/chapters/${id}`);
+totalEpisodes=chapters.data.chapterList.length;
+const wrap=document.getElementById("episodes");
+wrap.innerHTML="";
+
+chapters.data.chapterList.forEach(ch=>{
+const btn=document.createElement("div");
+btn.className="ep-btn";
+btn.textContent=ch.chapterIndex+1;
+btn.dataset.index=ch.chapterIndex;
+btn.onclick=()=>playEpisode(ch.chapterIndex,0);
+wrap.appendChild(btn);
+});
+
+playEpisode(ep,savedTime);
+}
+
+async function playEpisode(index,savedTime=0){
+currentEpisode=index;
+const watch=await apiCall(`/dramabox/api/v1/watch/${currentDrama}/${index}`);
+const player=document.getElementById("player");
+player.src=watch.data.videoUrl;
+
+player.onloadedmetadata=()=>{
+if(savedTime>0) player.currentTime=savedTime;
+};
+
+player.play();
+
+document.querySelectorAll(".ep-btn").forEach(btn=>btn.classList.remove("playing"));
+const active=document.querySelector(`.ep-btn[data-index="${index}"]`);
+if(active) active.classList.add("playing");
+
+player.onended=()=>{
+if(document.getElementById("autoplayToggle").checked && index+1<totalEpisodes){
+playEpisode(index+1,0);
+}
+};
+
+player.ontimeupdate=()=>{
+if(player.duration){
+saveContinue({
+bookId:currentDrama,
+episode:index+1,
+currentTime:player.currentTime,
+duration:player.duration,
+total:totalEpisodes,
+cover:currentCover,
+title:watch.data.bookName
+});
+}
+};
+}
+
+function goHome(){
+const player=document.getElementById("player");
+player.pause();
+player.src="";
+showPage("home");
+}
+
+function logout(){location.reload()}
+
+loadAll();
+showPage("home");
+</script>
+</body>
+</html>
