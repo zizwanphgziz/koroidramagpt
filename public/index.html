@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Koroi Drama</title>
 <link rel="icon" href="data:,">
+
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap');
 
@@ -23,7 +24,7 @@ color:white;
 overflow-x:hidden;
 }
 
-/* ===== Animated Background Logo ===== */
+/* Animated background */
 body::before{
 content:"";
 position:fixed;
@@ -37,7 +38,6 @@ z-index:-1;
 @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
 @keyframes fade{0%,100%{opacity:.04}50%{opacity:.09}}
 
-/* Header */
 header{
 display:flex;
 align-items:center;
@@ -154,27 +154,16 @@ padding:4px 8px;
 font-size:11px;
 border-radius:20px;
 }
-
-/* Continue Watching */
 .progress-bar{
 height:4px;
 background:var(--red);
 }
 
 /* DETAILS */
-.details{
-display:none;
-padding:30px 5%;
-}
-.video-wrap{
-position:relative;
-max-width:900px;
-margin:auto;
-}
-video{
-width:100%;
-border-radius:8px;
-}
+.details{display:none;padding:30px 5%}
+.video-wrap{position:relative;max-width:900px;margin:auto}
+video{width:100%;border-radius:8px}
+.autoplay{margin-top:10px;display:flex;gap:8px;align-items:center}
 .episodes{
 margin-top:20px;
 display:grid;
@@ -191,12 +180,10 @@ border-radius:4px;
 cursor:pointer;
 font-size:12px;
 }
-.ep-btn.playing{background:var(--red)}
-.autoplay{
-margin-top:10px;
-display:flex;
-align-items:center;
-gap:8px;
+.ep-btn.playing{
+background:var(--red);
+color:white;
+font-weight:600;
 }
 </style>
 </head>
@@ -241,8 +228,9 @@ gap:8px;
 <script>
 const API="/api/proxy";
 let heroList=[],heroIndex=0,heroTimer;
-let currentDrama=null,currentEpisode=0,totalEpisodes=0;
+let currentDrama=null,currentEpisode=0,totalEpisodes=0,currentCover="";
 
+/* Page control */
 function showPage(page){
 document.getElementById("homepage").style.display=page==="home"?"block":"none";
 document.getElementById("detailsPage").style.display=page==="details"?"block":"none";
@@ -258,7 +246,7 @@ async function updateHero(){
 const item=heroList[heroIndex];
 document.getElementById("heroTitle").textContent=item.bookName;
 document.getElementById("heroDesc").textContent=item.introduction;
-document.getElementById("heroBtn").onclick=()=>openDetails(item.bookId,0);
+document.getElementById("heroBtn").onclick=()=>openDetails(item.bookId,0,0,item.cover);
 
 const heroVideo=document.getElementById("heroVideo");
 heroVideo.classList.add("fade-out");
@@ -284,7 +272,7 @@ updateHero();
 },8000);
 }
 
-/* CONTINUE WATCHING */
+/* Continue Watching */
 function getContinue(){return JSON.parse(localStorage.getItem("continueWatching")||"[]")}
 function saveContinue(data){
 let list=getContinue().filter(x=>x.bookId!==data.bookId);
@@ -302,20 +290,21 @@ section.innerHTML=`<div class="section"><h2>Continue Watching</h2><div class="sc
 const row=section.querySelector(".scroll-row");
 
 list.forEach(item=>{
+const percent=item.duration?((item.currentTime/item.duration)*100):0;
 const card=document.createElement("div");
 card.className="card";
 card.innerHTML=`
 <div class="badge">Episode ${item.episode}/${item.total}</div>
 <img src="${item.cover}">
-<div class="progress-bar" style="width:${item.progress}%"></div>
+<div class="progress-bar" style="width:${percent}%"></div>
 <div class="card-title">${item.title}</div>
 `;
-card.onclick=()=>openDetails(item.bookId,item.episode-1,item.progress);
+card.onclick=()=>openDetails(item.bookId,item.episode-1,item.currentTime,item.cover);
 row.appendChild(card);
 });
 }
 
-/* CATEGORIES */
+/* Categories */
 function createSection(title,list){
 const container=document.getElementById("categoryContainer");
 const sec=document.createElement("div");
@@ -334,7 +323,7 @@ card.innerHTML=`
 <img src="${item.cover}">
 <div class="card-title">${item.bookName}</div>
 `;
-card.onclick=()=>openDetails(item.bookId,0);
+card.onclick=()=>openDetails(item.bookId,0,0,item.cover);
 row.appendChild(card);
 });
 
@@ -360,10 +349,11 @@ renderContinue();
 }
 
 /* DETAILS */
-async function openDetails(id,ep=0,savedProgress=0){
+async function openDetails(id,ep=0,savedTime=0,cover=""){
 showPage("details");
 currentDrama=id;
 currentEpisode=ep;
+currentCover=cover;
 document.getElementById("autoplayToggle").checked=true;
 
 const chapters=await apiCall(`/dramabox/api/v1/chapters/${id}`);
@@ -375,37 +365,51 @@ chapters.data.chapterList.forEach(ch=>{
 const btn=document.createElement("div");
 btn.className="ep-btn";
 btn.textContent=ch.chapterIndex+1;
-btn.onclick=()=>playEpisode(ch.chapterIndex);
+btn.dataset.index=ch.chapterIndex;
+btn.onclick=()=>playEpisode(ch.chapterIndex,0);
 wrap.appendChild(btn);
 });
 
-playEpisode(ep,savedProgress);
+playEpisode(ep,savedTime);
 }
 
-async function playEpisode(index,savedProgress=0){
+async function playEpisode(index,savedTime=0){
 currentEpisode=index;
 const watch=await apiCall(`/dramabox/api/v1/watch/${currentDrama}/${index}`);
 const player=document.getElementById("player");
 player.src=watch.data.videoUrl;
-player.currentTime=(savedProgress/100)*player.duration||0;
+
+player.onloadedmetadata=()=>{
+if(savedTime>0) player.currentTime=savedTime;
+};
+
 player.play();
 
+/* Highlight active episode */
+document.querySelectorAll(".ep-btn").forEach(btn=>btn.classList.remove("playing"));
+const active=document.querySelector(`.ep-btn[data-index="${index}"]`);
+if(active) active.classList.add("playing");
+
+/* Autoplay */
 player.onended=()=>{
 if(document.getElementById("autoplayToggle").checked && index+1<totalEpisodes){
-playEpisode(index+1);
+playEpisode(index+1,0);
 }
 };
 
+/* Save progress */
 player.ontimeupdate=()=>{
-const progress=(player.currentTime/player.duration)*100;
+if(player.duration){
 saveContinue({
 bookId:currentDrama,
 episode:index+1,
-progress:progress,
+currentTime:player.currentTime,
+duration:player.duration,
 total:totalEpisodes,
-cover:watch.data.cover||"",
-title:watch.data.bookName||""
+cover:currentCover,
+title:watch.data.bookName
 });
+}
 };
 }
 
@@ -421,6 +425,5 @@ function logout(){location.reload()}
 loadAll();
 showPage("home");
 </script>
-
 </body>
 </html>
