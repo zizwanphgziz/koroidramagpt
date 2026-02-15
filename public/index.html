@@ -4,299 +4,192 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Koroi Drama</title>
+<link rel="icon" href="data:,">
 
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap');
+
+:root{
+--red:#E50914;
+--bg:#0b0b0f;
+--card:#14141c;
+}
+
+*{box-sizing:border-box}
 body{
-    margin:0;
-    font-family:'Poppins',sans-serif;
-    background:#0b0f1a url('https://i.imgur.com/MC7KXb2.png') center center no-repeat fixed;
-    background-size:600px;
-    background-blend-mode:overlay;
-    color:white;
+margin:0;
+font-family:Poppins;
+background:var(--bg);
+color:white;
+overflow-x:hidden;
 }
 
-/* ===== HEADER ===== */
+/* Animated background */
+body::before{
+content:"";
+position:fixed;
+inset:0;
+background:url("https://i.imgur.com/MC7KXb2.png") center/40% no-repeat;
+opacity:.05;
+animation:spin 80s linear infinite,fade 12s ease-in-out infinite;
+pointer-events:none;
+z-index:-1;
+}
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+@keyframes fade{0%,100%{opacity:.04}50%{opacity:.09}}
+
 header{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:15px 20px;
-    background:#000;
+display:flex;
+align-items:center;
+justify-content:space-between;
+padding:16px 5%;
 }
-.logo-wrap{
-    display:flex;
-    align-items:center;
-    gap:12px;
+.logo-wrap{display:flex;align-items:center;gap:14px}
+.logo-wrap img{width:80px}
+.logo-text{
+font-size:26px;
+font-weight:800;
+background:linear-gradient(90deg,#ff3d3d,#ff0000,#ff5c5c);
+-webkit-background-clip:text;
+-webkit-text-fill-color:transparent;
 }
-.logo-wrap img{
-    width:48px;
-}
-.logo-wrap h1{
-    font-size:1.6rem;
-    color:#ff2a2a;
-}
-.logout-btn{
-    background:#ff2a2a;
-    border:none;
-    color:white;
-    padding:8px 16px;
-    border-radius:8px;
-    cursor:pointer;
+.btn{
+background:linear-gradient(90deg,#ff3d3d,#ff0000);
+border:none;
+padding:10px 18px;
+border-radius:6px;
+color:white;
+font-weight:600;
+cursor:pointer;
 }
 
-/* ===== HERO ===== */
+/* HERO */
 .hero{
-    position:relative;
-    width:90%;
-    margin:20px auto;
-    border-radius:20px;
-    overflow:hidden;
+position:relative;
+height:70vh;
+overflow:hidden;
+display:flex;
+align-items:flex-end;
+padding:40px 5%;
 }
-.hero video,
-.hero img{
-    width:100%;
-    height:420px;
-    object-fit:cover;
+.hero video{
+position:absolute;
+inset:0;
+width:100%;
+height:100%;
+object-fit:cover;
+opacity:1;
+transition:opacity .8s ease-in-out;
+}
+.hero video.fade-out{opacity:0}
+.hero-overlay{
+position:absolute;
+inset:0;
+background:linear-gradient(to top,rgba(0,0,0,.9),rgba(0,0,0,.2));
 }
 .hero-content{
-    position:absolute;
-    bottom:30px;
-    left:30px;
-    max-width:50%;
+position:relative;
+max-width:600px;
+z-index:2;
 }
-.hero-content h2{
-    font-size:2rem;
-    margin-bottom:10px;
-}
+.hero-content h1{font-size:34px;margin-bottom:10px}
 .hero-content p{
-    font-size:1rem;
-    margin-bottom:15px;
-}
-.hero-content button{
-    background:#ff2a2a;
-    border:none;
-    color:white;
-    padding:10px 20px;
-    border-radius:10px;
-    cursor:pointer;
+font-size:14px;
+line-height:1.6;
+max-height:70px;
+overflow:hidden;
 }
 
-/* ===== CATEGORY SECTION ===== */
-.section{
-    padding:20px;
+/* Sections */
+.section{padding:30px 5%;position:relative}
+.section h2{margin-bottom:15px}
+.scroll-row{
+display:flex;
+gap:14px;
+overflow-x:auto;
+scroll-behavior:smooth;
 }
-.section h2{
-    margin-bottom:15px;
-}
-
-.scroll-wrap{
-    position:relative;
-}
+.scroll-row::-webkit-scrollbar{display:none}
 .scroll-btn{
-    position:absolute;
-    top:40%;
-    background:#000a;
-    border:none;
-    color:white;
-    font-size:1.5rem;
-    width:40px;
-    height:40px;
-    border-radius:50%;
-    cursor:pointer;
-    z-index:10;
+position:absolute;
+top:50%;
+transform:translateY(-50%);
+background:rgba(0,0,0,.6);
+border:none;
+color:white;
+width:35px;height:35px;
+border-radius:50%;
+cursor:pointer;
+z-index:10;
 }
-.scroll-btn.left{ left:-10px; }
-.scroll-btn.right{ right:-10px; }
+.scroll-left{left:2%}
+.scroll-right{right:2%}
 
-.card-row{
-    display:flex;
-    gap:15px;
-    overflow-x:auto;
-    scroll-behavior:smooth;
+/* Cards */
+.card{
+min-width:160px;
+background:var(--card);
+border-radius:8px;
+overflow:hidden;
+position:relative;
+cursor:pointer;
+display:flex;
+flex-direction:column;
 }
-.card-row::-webkit-scrollbar{ display:none; }
-
-/* ===== CARD ===== */
-.drama-card,
-.continue-card{
-    flex:0 0 180px;
-    background:#141a29;
-    border-radius:12px;
-    overflow:hidden;
-    cursor:pointer;
-    display:flex;
-    flex-direction:column;
+.card img{
+width:100%;
+height:230px;
+object-fit:cover;
 }
-.drama-card img,
-.continue-card img{
-    width:100%;
-    height:250px;
-    object-fit:cover;
+.card-title{
+padding:8px;
+font-size:13px;
+text-align:center;
+min-height:38px;
+display:-webkit-box;
+-webkit-line-clamp:2;
+-webkit-box-orient:vertical;
+overflow:hidden;
 }
-
-/* ===== CATEGORY TITLE STYLE ===== */
-.drama-card-title{
-    font-size:0.9rem;
-    font-weight:500;
-    text-align:center;
-    padding:10px;
-    line-height:1.3;
-    height:48px;
-    display:-webkit-box;
-    -webkit-line-clamp:2;
-    -webkit-box-orient:vertical;
-    overflow:hidden;
+.badge{
+position:absolute;
+top:8px;
+left:8px;
+background:var(--red);
+padding:4px 8px;
+font-size:11px;
+border-radius:20px;
 }
-
-/* ===== CONTINUE WATCHING TITLE FIX ===== */
-.continue-card .card-title{
-    font-size:0.9rem;
-    font-weight:500;
-    text-align:center;
-    padding:10px;
-    line-height:1.3;
-    height:48px;
-    display:-webkit-box;
-    -webkit-line-clamp:2;
-    -webkit-box-orient:vertical;
-    overflow:hidden;
-}
-
-/* ===== PROGRESS BAR ===== */
 .progress-bar{
-    height:5px;
-    background:#ff2a2a;
-    width:40%;
+height:4px;
+background:var(--red);
 }
 
-/* ===== DETAILS PAGE ===== */
-#detailsPage{
-    display:none;
-    padding:20px;
+/* DETAILS */
+.details{display:none;padding:30px 5%}
+.video-wrap{position:relative;max-width:900px;margin:auto}
+video{width:100%;border-radius:8px}
+.autoplay{margin-top:10px;display:flex;gap:8px;align-items:center}
+.episodes{
+margin-top:20px;
+display:grid;
+grid-template-columns:repeat(auto-fill,minmax(80px,1fr));
+gap:8px;
+max-height:300px;
+overflow-y:auto;
 }
-#videoPlayer{
-    width:100%;
-    max-width:900px;
-    border-radius:12px;
-    display:block;
-    margin:auto;
+.ep-btn{
+background:#1e1e27;
+padding:8px;
+text-align:center;
+border-radius:4px;
+cursor:pointer;
+font-size:12px;
 }
-.back-btn{
-    background:#ff2a2a;
-    border:none;
-    color:white;
-    padding:8px 15px;
-    border-radius:8px;
-    margin-bottom:15px;
-    cursor:pointer;
-}
-#episodeList{
-    margin-top:20px;
-    display:flex;
-    flex-wrap:wrap;
-    gap:8px;
-}
-.episode-item{
-    padding:6px 12px;
-    background:#1d2435;
-    border-radius:6px;
-    cursor:pointer;
-}
-.episode-item.active{
-    background:#ff2a2a;
-    color:white;
-}
-
-/* ===== RESPONSIVE ===== */
-@media(max-width:768px){
-    .hero-content{
-        max-width:90%;
-    }
+.ep-btn.playing{
+background:var(--red);
+color:white;
+font-weight:600;
 }
 </style>
 </head>
-
-<body>
-
-<header>
-<div class="logo-wrap">
-<img src="https://i.imgur.com/MC7KXb2.png">
-<h1>Koroi Drama</h1>
-</div>
-<button class="logout-btn">Log Keluar</button>
-</header>
-
-<!-- HERO -->
-<div class="hero">
-<img id="heroImage">
-<div class="hero-content">
-<h2 id="heroTitle"></h2>
-<p id="heroDesc"></p>
-<button id="heroPlay">Tonton Sekarang</button>
-</div>
-</div>
-
-<!-- CONTINUE WATCHING -->
-<div class="section" id="continueSection" style="display:none;">
-<h2>Continue Watching</h2>
-<div class="scroll-wrap">
-<button class="scroll-btn left" onclick="scrollRow(this,-1)">‹</button>
-<div class="card-row" id="continueRow"></div>
-<button class="scroll-btn right" onclick="scrollRow(this,1)">›</button>
-</div>
-</div>
-
-<!-- CATEGORY -->
-<div class="section">
-<h2>Terbaru</h2>
-<div class="scroll-wrap">
-<button class="scroll-btn left" onclick="scrollRow(this,-1)">‹</button>
-<div class="card-row" id="latestRow"></div>
-<button class="scroll-btn right" onclick="scrollRow(this,1)">›</button>
-</div>
-</div>
-
-<!-- DETAILS -->
-<div id="detailsPage">
-<button class="back-btn" onclick="goHome()">Kembali</button>
-<video id="videoPlayer" controls></video>
-<div id="episodeList"></div>
-</div>
-
-<script>
-// Dummy Data (ganti dengan API korang)
-const dramas = [
-{ id:1,title:"Asalku dari Zaman Kuno (Sulih Suara)",cover:"https://hwztchapter.dramaboxdb.com/data/cppartner/4x2/42x0/420x0/42000005232/42000005232.jpg?t=1769677589011",episodes:62 },
-{ id:2,title:"Digantikan, Lalu Menikah Mendadak (Sulih Suara)",cover:"https://hwztchapter.dramaboxdb.com/data/cppartner/4x2/42x0/420x0/42000005239/42000005239.jpg?t=1769679678055",episodes:73 }
-];
-
-const latestRow=document.getElementById("latestRow");
-
-dramas.forEach(d=>{
-const card=document.createElement("div");
-card.className="drama-card";
-card.innerHTML=`
-<img src="${d.cover}">
-<div class="drama-card-title">${d.title}</div>
-`;
-card.onclick=()=>openDrama(d);
-latestRow.appendChild(card);
-});
-
-function scrollRow(btn,dir){
-const row=btn.parentElement.querySelector(".card-row");
-row.scrollBy({left:dir*300,behavior:'smooth'});
-}
-
-function openDrama(d){
-document.getElementById("detailsPage").style.display="block";
-window.scrollTo(0,0);
-}
-
-function goHome(){
-document.getElementById("detailsPage").style.display="none";
-}
-</script>
-
-</body>
-</html>
