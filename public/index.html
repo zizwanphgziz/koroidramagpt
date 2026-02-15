@@ -1,4 +1,3 @@
-<!-- KOROI DRAMA v1.4 – PHASE 2 CONTINUE WATCHING -->
 <!DOCTYPE html>
 <html lang="ms">
 <head>
@@ -8,58 +7,154 @@
 <link rel="icon" href="https://i.imgur.com/MC7KXb2.png">
 
 <style>
-/* ===== BASE STYLE (UNCHANGED CORE) ===== */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap');
-body{margin:0;font-family:'Poppins',sans-serif;background:#070f1e;color:white;overflow-x:hidden}
+
+body{
+margin:0;
+font-family:'Poppins',sans-serif;
+background:#070f1e;
+color:white;
+overflow-x:hidden;
+}
 
 /* ===== BACKGROUND ===== */
 .bg-logo{
-position:fixed;top:50%;left:50%;
-width:500px;height:500px;
+position:fixed;
+top:50%;
+left:50%;
+width:500px;
+height:500px;
 background:url('https://i.imgur.com/MC7KXb2.png') no-repeat center;
 background-size:contain;
-opacity:0.05;pointer-events:none;z-index:-1;
+opacity:0.05;
+pointer-events:none;
+z-index:-1;
 transform:translate(-50%,-50%);
-animation:rotateLogo 60s linear infinite,fadeLogo 8s ease-in-out infinite}
+animation:rotateLogo 60s linear infinite,fadeLogo 8s ease-in-out infinite;
+}
 @keyframes rotateLogo{
-from{transform:translate(-50%,-50%) rotate(0deg)}
-to{transform:translate(-50%,-50%) rotate(360deg)}}
-@keyframes fadeLogo{0%,100%{opacity:.04}50%{opacity:.08}}
-@media(max-width:768px){.bg-logo{width:300px;height:300px}}
+from{transform:translate(-50%,-50%) rotate(0deg);}
+to{transform:translate(-50%,-50%) rotate(360deg);}
+}
+@keyframes fadeLogo{
+0%,100%{opacity:.04;}
+50%{opacity:.08;}
+}
+@media(max-width:768px){
+.bg-logo{width:300px;height:300px;}
+}
 
 /* ===== HEADER ===== */
-header{display:flex;justify-content:space-between;align-items:center;padding:15px 20px;background:#000c;backdrop-filter:blur(10px)}
-.logo-area{display:flex;align-items:center;gap:10px}
+header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:15px 20px;
+background:#000c;
+backdrop-filter:blur(10px);
+}
+.logo-area{
+display:flex;
+align-items:center;
+gap:10px;
+}
 .logo-area img{width:55px}
-.logo-title{font-weight:800;font-size:1.6rem;color:#ff2b2b}
+.logo-title{
+font-weight:800;
+font-size:1.6rem;
+color:#ff2b2b;
+}
 .logout-btn,.back-btn,.hero-btn{
 background:linear-gradient(45deg,#ff1e1e,#ff5e5e);
-border:none;color:white;padding:8px 18px;border-radius:14px;
-font-weight:600;cursor:pointer}
+border:none;
+color:white;
+padding:8px 18px;
+border-radius:14px;
+font-weight:600;
+cursor:pointer;
+}
 
-/* ===== HERO (UNCHANGED) ===== */
-.hero{margin:20px;border-radius:25px;overflow:hidden;position:relative;height:430px;background:black}
-.hero video{width:100%;height:100%;object-fit:cover}
-.hero-content{position:absolute;bottom:0;left:0;right:0;padding:20px;background:linear-gradient(to top,black,transparent)}
-.hero-title{font-size:1.8rem;font-weight:800}
-.hero-desc{font-size:.95rem;opacity:.85}
+/* ===== HERO ===== */
+.hero{
+margin:20px;
+border-radius:25px;
+overflow:hidden;
+position:relative;
+height:430px;
+background:black;
+}
+.hero video{
+width:100%;
+height:100%;
+object-fit:cover;
+}
+.hero-content{
+position:absolute;
+bottom:0;
+left:0;
+right:0;
+padding:20px;
+background:linear-gradient(to top,black,transparent);
+}
+.hero-title{
+font-size:1.8rem;
+font-weight:800;
+}
+.hero-desc{
+font-size:.95rem;
+opacity:.85;
+}
 
 /* ===== SECTION ===== */
-.section{padding:0 20px 35px}
-.section h2{margin-bottom:12px}
-.scroll-wrapper{position:relative}
-.drama-grid{display:flex;gap:16px;overflow-x:auto;scroll-behavior:smooth}
-.drama-grid::-webkit-scrollbar{display:none}
+.section{
+padding:0 20px 35px;
+}
+.section h2{
+margin-bottom:12px;
+}
+.scroll-wrapper{
+position:relative;
+}
+.drama-grid{
+display:flex;
+gap:16px;
+overflow-x:auto;
+scroll-behavior:smooth;
+}
+.drama-grid::-webkit-scrollbar{
+display:none;
+}
 .drama-card{
-flex:0 0 180px;background:#111c2e;border-radius:18px;
-overflow:hidden;cursor:pointer;transition:.3s;display:flex;flex-direction:column}
-.drama-card:hover{transform:translateY(-6px);box-shadow:0 10px 25px black}
-.drama-card img{width:100%;aspect-ratio:3/4;object-fit:cover}
+flex:0 0 180px;
+background:#111c2e;
+border-radius:18px;
+overflow:hidden;
+cursor:pointer;
+transition:.3s;
+display:flex;
+flex-direction:column;
+}
+.drama-card:hover{
+transform:translateY(-6px);
+box-shadow:0 10px 25px black;
+}
+.drama-card img{
+width:100%;
+aspect-ratio:3/4;
+object-fit:cover;
+}
 .drama-card-title{
-padding:10px;text-align:center;font-weight:600;font-size:.9rem;
-display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+padding:10px;
+text-align:center;
+font-weight:600;
+font-size:.9rem;
+display:-webkit-box;
+-webkit-line-clamp:2;
+-webkit-box-orient:vertical;
+overflow:hidden;
+}
 
-/* ===== CONTINUE WATCHING PREMIUM CARD ===== */
+/* ===== CONTINUE CARD ===== */
 .continue-card{
 flex:0 0 220px;
 background:#141d33;
@@ -83,36 +178,94 @@ background:#ff1e1e;
 
 /* ===== SCROLL BUTTON ===== */
 .scroll-btn{
-position:absolute;top:50%;transform:translateY(-50%);
-width:40px;height:40px;border-radius:50%;border:none;
+position:absolute;
+top:50%;
+transform:translateY(-50%);
+width:40px;
+height:40px;
+border-radius:50%;
+border:none;
 background:rgba(255,255,255,0.1);
-backdrop-filter:blur(10px);color:white;font-size:20px;
-cursor:pointer;display:flex;align-items:center;justify-content:center;
-opacity:0;transition:.3s;z-index:10}
-.scroll-wrapper:hover .scroll-btn{opacity:1}
-.scroll-left{left:-10px}.scroll-right{right:-10px}
-@media(max-width:768px){.scroll-btn{display:none}}
+backdrop-filter:blur(10px);
+color:white;
+font-size:20px;
+cursor:pointer;
+display:flex;
+align-items:center;
+justify-content:center;
+opacity:0;
+transition:.3s;
+z-index:10;
+}
+.scroll-wrapper:hover .scroll-btn{
+opacity:1;
+}
+.scroll-left{left:-10px;}
+.scroll-right{right:-10px;}
+@media(max-width:768px){
+.scroll-btn{display:none;}
+}
 
-/* ===== DETAILS (UNCHANGED CORE) ===== */
-#details{display:none;padding:20px}
-.details-container{display:flex;gap:25px}
-.video-area{flex:2;position:sticky;top:20px}
-.video-area video{width:100%;border-radius:16px}
+/* ===== DETAILS ===== */
+#details{
+display:none;
+padding:20px;
+}
+.details-container{
+display:flex;
+gap:25px;
+}
+.video-area{
+flex:2;
+position:sticky;
+top:20px;
+}
+.video-area video{
+width:100%;
+border-radius:16px;
+}
 .episode-area{
-flex:1;max-height:80vh;overflow-y:auto;
-background:#111c2e;border-radius:16px;padding:15px}
-.episode{background:#1f2638;padding:10px;border-radius:10px;margin-bottom:8px;cursor:pointer}
-.episode.playing{background:#ff1e1e}
-.toggle-area{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+flex:1;
+max-height:80vh;
+overflow-y:auto;
+background:#111c2e;
+border-radius:16px;
+padding:15px;
+}
+.episode{
+background:#1f2638;
+padding:10px;
+border-radius:10px;
+margin-bottom:8px;
+cursor:pointer;
+}
+.episode.playing{
+background:#ff1e1e;
+}
+.toggle-area{
+display:flex;
+align-items:center;
+justify-content:space-between;
+margin-bottom:10px;
+}
 @media(max-width:900px){
-.details-container{flex-direction:column}
-.video-area{position:sticky;top:0;background:#070f1e;z-index:5;padding-bottom:10px}
-.episode-area{max-height:60vh}
+.details-container{flex-direction:column;}
+.video-area{
+position:sticky;
+top:0;
+background:#070f1e;
+z-index:5;
+padding-bottom:10px;
+}
+.episode-area{
+max-height:60vh;
+}
 }
 </style>
 </head>
 
 <body>
+
 <div class="bg-logo"></div>
 
 <header>
@@ -158,45 +311,71 @@ background:#111c2e;border-radius:16px;padding:15px}
 const apiBase="/api/proxy";
 let heroList=[],heroIndex=0,heroTimer;
 let autoPlay=true;
+let saveInterval=null;
+
 const player=document.getElementById("player");
 
-/* ===== CONTINUE WATCHING STORAGE ===== */
+/* ===== CONTINUE STORAGE ===== */
+
 function getContinue(){
 return JSON.parse(localStorage.getItem("koroiContinueWatching")||"[]");
 }
-function saveContinue(data){
-localStorage.setItem("koroiContinueWatching",JSON.stringify(data));
+
+function saveContinue(list){
+localStorage.setItem("koroiContinueWatching",JSON.stringify(list));
 }
-function updateContinue(entry){
+
+function upsertContinue(entry){
 let list=getContinue();
 list=list.filter(i=>i.bookId!==entry.bookId);
-if(entry.progress<95) list.unshift(entry);
+list.unshift(entry);
 list=list.slice(0,10);
 saveContinue(list);
 renderContinue();
 }
 
-/* ===== RENDER CONTINUE ===== */
 function renderContinue(){
+let old=document.getElementById("continue-section");
+if(old) old.remove();
+
 const list=getContinue();
 if(!list.length) return;
 
 const container=document.getElementById("content");
 const section=document.createElement("div");
 section.className="section";
+section.id="continue-section";
 section.innerHTML="<h2>Continue Watching</h2>";
+
 const wrapper=document.createElement("div");
 wrapper.className="scroll-wrapper";
+
 const grid=document.createElement("div");
 grid.className="drama-grid";
 
 list.forEach(item=>{
+const progress=(item.currentTime/item.duration)*100;
+
 const card=document.createElement("div");
 card.className="continue-card";
 card.innerHTML=`
 <img src="${item.cover}">
-<div class="progress-bar" style="width:${item.progress}%"></div>`;
-card.onclick=()=>openDetails(item.bookId,item.title,item.episodeIndex,item.currentTime);
+<div style="position:absolute;top:8px;left:8px;background:#000a;padding:4px 8px;border-radius:8px;font-size:.8rem">
+Episod ${item.episodeIndex+1}
+</div>
+<div class="progress-bar" style="width:${progress}%"></div>
+`;
+
+card.onclick=()=>{
+openDetails(
+item.bookId,
+item.title,
+item.episodeIndex,
+item.currentTime,
+item.cover
+);
+};
+
 grid.appendChild(card);
 });
 
@@ -206,21 +385,27 @@ container.prepend(section);
 }
 
 /* ===== SAVE WATCHING ===== */
-player.addEventListener("timeupdate",()=>{
+
+function startSaveTracking(){
+clearInterval(saveInterval);
+saveInterval=setInterval(()=>{
 if(!player.duration) return;
-const progress=(player.currentTime/player.duration)*100;
-updateContinue({
+
+upsertContinue({
 bookId:player.dataset.bookId,
 title:player.dataset.title,
 cover:player.dataset.cover,
-episodeIndex:player.dataset.ep,
+episodeIndex:parseInt(player.dataset.ep),
 currentTime:player.currentTime,
 duration:player.duration,
-progress
-});
+updatedAt:Date.now()
 });
 
+},3000);
+}
+
 /* ===== API ===== */
+
 async function apiCall(endpoint){
 const target=`https://captain.sapimu.au${endpoint}?lang=in`;
 const res=await fetch(`${apiBase}?url=${encodeURIComponent(target)}`);
@@ -228,6 +413,7 @@ return res.json();
 }
 
 /* ===== HOME ===== */
+
 async function loadHome(){
 document.getElementById("content").innerHTML="";
 renderContinue();
@@ -245,13 +431,16 @@ createSection("Mesti Tonton", mesti.data.list);
 }
 
 /* ===== CREATE SECTION ===== */
+
 function createSection(title,list){
 const container=document.getElementById("content");
 const section=document.createElement("div");
 section.className="section";
 section.innerHTML=`<h2>${title}</h2>`;
+
 const wrapper=document.createElement("div");
 wrapper.className="scroll-wrapper";
+
 const grid=document.createElement("div");
 grid.className="drama-grid";
 
@@ -270,6 +459,7 @@ container.appendChild(section);
 }
 
 /* ===== DETAILS ===== */
+
 async function openDetails(bookId,title,startEp=0,startTime=0,cover=""){
 document.getElementById("home").style.display="none";
 document.getElementById("details").style.display="block";
@@ -293,6 +483,8 @@ playEpisode(bookId,title,startEp,startTime,cover);
 }
 }
 
+/* ===== PLAY EPISODE ===== */
+
 async function playEpisode(bookId,title,index,time=0,cover=""){
 const res=await apiCall(`/dramabox/api/v1/watch/${bookId}/${index}`);
 if(res?.data?.videoUrl){
@@ -303,12 +495,31 @@ player.dataset.ep=index;
 player.dataset.cover=cover;
 player.currentTime=time||0;
 player.play().catch(()=>{});
+
 document.querySelectorAll(".episode").forEach(e=>e.classList.remove("playing"));
 document.querySelectorAll(".episode")[index].classList.add("playing");
+
+startSaveTracking();
 }
 }
 
+/* ===== AUTOPLAY ===== */
+
+document.getElementById("autoToggle").addEventListener("change",e=>{
+autoPlay=e.target.checked;
+});
+
+player.addEventListener("ended",()=>{
+if(autoPlay){
+const current=document.querySelector(".episode.playing");
+if(current && current.nextElementSibling){
+current.nextElementSibling.click();
+}
+}
+});
+
 /* ===== HERO ===== */
+
 function startHero(){
 updateHero();
 clearInterval(heroTimer);
@@ -317,24 +528,31 @@ heroIndex=(heroIndex+1)%heroList.length;
 updateHero();
 },8000);
 }
+
 async function updateHero(){
 const item=heroList[heroIndex];
 document.getElementById("heroTitle").textContent=item.bookName;
 document.getElementById("heroDesc").textContent=item.introduction;
 document.getElementById("heroBtn").onclick=()=>openDetails(item.bookId,item.bookName,0,0,item.cover);
+
 const watch=await apiCall(`/dramabox/api/v1/watch/${item.bookId}/0`);
 const heroVideo=document.getElementById("heroVideo");
 heroVideo.pause();heroVideo.src="";heroVideo.load();
-if(watch?.data?.videoUrl){heroVideo.src=watch.data.videoUrl;heroVideo.play().catch(()=>{});}
+if(watch?.data?.videoUrl){
+heroVideo.src=watch.data.videoUrl;
+heroVideo.play().catch(()=>{});
+}
 }
 
 function goHome(){
 document.getElementById("details").style.display="none";
 document.getElementById("home").style.display="block";
+clearInterval(saveInterval);
 loadHome();
 }
 
 loadHome();
 </script>
+
 </body>
 </html>
