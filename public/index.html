@@ -24,7 +24,7 @@ color:white;
 overflow-x:hidden;
 }
 
-/* Animated background */
+/* BACKGROUND LOGO */
 body::before{
 content:"";
 position:fixed;
@@ -49,9 +49,7 @@ padding:16px 5%;
 .logo-text{
 font-size:26px;
 font-weight:800;
-background:linear-gradient(90deg,#ff3d3d,#ff0000,#ff5c5c);
--webkit-background-clip:text;
--webkit-text-fill-color:transparent;
+color:#ff3d3d;
 }
 .btn{
 background:linear-gradient(90deg,#ff3d3d,#ff0000);
@@ -80,7 +78,6 @@ height:100%;
 object-fit:cover;
 transition:opacity .8s ease-in-out;
 }
-.hero video.fade-out{opacity:0}
 .hero-overlay{
 position:absolute;
 inset:0;
@@ -91,7 +88,10 @@ position:relative;
 max-width:600px;
 z-index:2;
 }
-.hero-content h1{font-size:34px;margin-bottom:10px}
+.hero-content h1{
+font-size:34px;
+margin-bottom:10px;
+}
 .hero-content p{
 font-size:14px;
 line-height:1.6;
@@ -99,9 +99,14 @@ max-height:70px;
 overflow:hidden;
 }
 
-/* Sections */
-.section{padding:30px 5%;position:relative}
-.section h2{margin-bottom:15px}
+/* SECTION */
+.section{
+padding:30px 5%;
+position:relative;
+}
+.section h2{
+margin-bottom:15px;
+}
 .scroll-row{
 display:flex;
 gap:14px;
@@ -109,6 +114,7 @@ overflow-x:auto;
 scroll-behavior:smooth;
 }
 .scroll-row::-webkit-scrollbar{display:none}
+
 .scroll-btn{
 position:absolute;
 top:50%;
@@ -116,7 +122,8 @@ transform:translateY(-50%);
 background:rgba(0,0,0,.6);
 border:none;
 color:white;
-width:35px;height:35px;
+width:35px;
+height:35px;
 border-radius:50%;
 cursor:pointer;
 z-index:10;
@@ -124,13 +131,10 @@ z-index:10;
 .scroll-left{left:2%}
 .scroll-right{right:2%}
 
-/* ============================= */
-/* FIXED CARD STANDARD SIZE */
-/* ============================= */
-
+/* CARD STANDARDIZED */
 .card{
-min-width:170px;
-max-width:170px;
+flex:0 0 160px;
+width:160px;
 background:var(--card);
 border-radius:8px;
 overflow:hidden;
@@ -142,23 +146,20 @@ flex-direction:column;
 
 .card img{
 width:100%;
-height:240px;
+height:230px;
 object-fit:cover;
-flex-shrink:0;
 }
 
 .card-title{
-padding:8px 8px 10px;
+padding:8px;
 font-size:13px;
 text-align:center;
 line-height:1.4;
-min-height:40px;
-max-height:40px;
+height:42px;
 display:-webkit-box;
 -webkit-line-clamp:2;
 -webkit-box-orient:vertical;
 overflow:hidden;
-word-break:break-word;
 }
 
 .badge{
@@ -245,7 +246,6 @@ font-weight:600;
 <script>
 const API="/api/proxy";
 let heroList=[],heroIndex=0,heroTimer;
-let currentDrama=null,currentEpisode=0,totalEpisodes=0,currentCover="";
 
 function showPage(page){
 document.getElementById("homepage").style.display=page==="home"?"block":"none";
@@ -253,11 +253,126 @@ document.getElementById("detailsPage").style.display=page==="details"?"block":"n
 }
 
 async function apiCall(endpoint){
+try{
 const r=await fetch(`${API}?url=${encodeURIComponent("https://captain.sapimu.au"+endpoint+"?lang=in")}`);
-return r.json();
+return await r.json();
+}catch(e){
+console.error("API ERROR:",e);
+return null;
+}
 }
 
-/* Continue engine & rest of JS kekal EXACT sama */
+/* HERO */
+async function updateHero(){
+if(!heroList.length) return;
+const item=heroList[heroIndex];
+document.getElementById("heroTitle").textContent=item.bookName;
+document.getElementById("heroDesc").textContent=item.introduction;
+document.getElementById("heroBtn").onclick=()=>openDetails(item.bookId,0,0,item.cover);
+
+const heroVideo=document.getElementById("heroVideo");
+const watch=await apiCall(`/dramabox/api/v1/watch/${item.bookId}/0`);
+if(watch?.data?.videoUrl){
+heroVideo.src=watch.data.videoUrl;
+heroVideo.play().catch(()=>{});
+}
+}
+
+function startHero(){
+updateHero();
+heroTimer=setInterval(()=>{
+heroIndex=(heroIndex+1)%heroList.length;
+updateHero();
+},8000);
+}
+
+/* CONTINUE WATCHING */
+function getContinue(){
+return JSON.parse(localStorage.getItem("continueWatching")||"[]")
+}
+function saveContinue(data){
+let list=getContinue().filter(x=>x.bookId!==data.bookId);
+list.unshift(data);
+localStorage.setItem("continueWatching",JSON.stringify(list.slice(0,10)));
+renderContinue();
+}
+
+function renderContinue(){
+const section=document.getElementById("continueSection");
+const list=getContinue();
+if(!list.length){section.innerHTML="";return;}
+
+section.innerHTML=`<div class="section"><h2>Continue Watching</h2><div class="scroll-row"></div></div>`;
+const row=section.querySelector(".scroll-row");
+
+list.forEach(item=>{
+const percent=item.duration?((item.currentTime/item.duration)*100):0;
+const card=document.createElement("div");
+card.className="card";
+card.innerHTML=`
+<div class="badge">Episode ${item.episode}/${item.total}</div>
+<img src="${item.cover}">
+<div class="progress-bar" style="width:${percent}%"></div>
+<div class="card-title">${item.title}</div>
+`;
+card.onclick=()=>openDetails(item.bookId,item.episode-1,item.currentTime,item.cover);
+row.appendChild(card);
+});
+}
+
+/* CATEGORY */
+function createSection(title,list){
+const container=document.getElementById("categoryContainer");
+const sec=document.createElement("div");
+sec.className="section";
+sec.innerHTML=`<h2>${title}</h2>
+<button class="scroll-btn scroll-left">‹</button>
+<button class="scroll-btn scroll-right">›</button>
+<div class="scroll-row"></div>`;
+const row=sec.querySelector(".scroll-row");
+
+list.forEach(item=>{
+const card=document.createElement("div");
+card.className="card";
+card.innerHTML=`
+<div class="badge">${item.chapterCount} Episod</div>
+<img src="${item.cover}">
+<div class="card-title">${item.bookName}</div>
+`;
+card.onclick=()=>openDetails(item.bookId,0,0,item.cover);
+row.appendChild(card);
+});
+
+sec.querySelector(".scroll-left").onclick=()=>row.scrollBy({left:-300,behavior:"smooth"});
+sec.querySelector(".scroll-right").onclick=()=>row.scrollBy({left:300,behavior:"smooth"});
+container.appendChild(sec);
+}
+
+async function loadAll(){
+const container=document.getElementById("categoryContainer");
+container.innerHTML="";
+
+const terbaru=await apiCall("/dramabox/api/v1/new/1?pageSize=20");
+if(!terbaru?.data?.list) return;
+
+heroList=terbaru.data.list.slice(0,5);
+startHero();
+
+createSection("Terbaru",terbaru.data.list);
+renderContinue();
+}
+
+function goHome(){
+const player=document.getElementById("player");
+player.pause();
+player.src="";
+showPage("home");
+}
+
+function logout(){location.reload()}
+
+loadAll();
+showPage("home");
 </script>
 </body>
 </html>
