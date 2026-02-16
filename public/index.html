@@ -16,6 +16,7 @@
 }
 
 *{box-sizing:border-box}
+
 body{
 margin:0;
 font-family:Poppins;
@@ -24,7 +25,7 @@ color:white;
 overflow-x:hidden;
 }
 
-/* Animated Background */
+/* Background */
 body::before{
 content:"";
 position:fixed;
@@ -36,10 +37,16 @@ pointer-events:none;
 z-index:-1;
 }
 
-@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
-@keyframes fade{0%,100%{opacity:.04}50%{opacity:.09}}
+@keyframes spin{
+from{transform:rotate(0)}
+to{transform:rotate(360deg)}
+}
 
-/* HEADER */
+@keyframes fade{
+0%,100%{opacity:.04}
+50%{opacity:.09}
+}
+
 header{
 display:flex;
 align-items:center;
@@ -53,7 +60,9 @@ align-items:center;
 gap:14px;
 }
 
-.logo-wrap img{width:80px}
+.logo-wrap img{
+width:80px;
+}
 
 .logo-text{
 font-size:26px;
@@ -73,48 +82,6 @@ font-weight:600;
 cursor:pointer;
 }
 
-/* PLATFORM SELECT */
-#platformPage{
-position:fixed;
-inset:0;
-background:#0b0b0f;
-display:flex;
-align-items:center;
-justify-content:center;
-z-index:9999;
-}
-
-.platform-container{
-text-align:center;
-}
-
-.platform-list{
-display:flex;
-gap:20px;
-margin-top:30px;
-flex-wrap:wrap;
-justify-content:center;
-}
-
-.platform-card{
-width:180px;
-height:220px;
-background:#14141c;
-border-radius:12px;
-display:flex;
-align-items:center;
-justify-content:center;
-cursor:pointer;
-font-weight:700;
-font-size:18px;
-transition:.3s;
-}
-
-.platform-card:hover{
-transform:scale(1.05);
-background:#1f1f2b;
-}
-
 /* HERO */
 .hero{
 position:relative;
@@ -131,6 +98,7 @@ inset:0;
 width:100%;
 height:100%;
 object-fit:cover;
+transition:opacity .8s ease-in-out;
 }
 
 .hero-overlay{
@@ -145,10 +113,26 @@ max-width:600px;
 z-index:2;
 }
 
-/* SECTIONS */
+.hero-content h1{
+font-size:34px;
+margin-bottom:10px;
+}
+
+.hero-content p{
+font-size:14px;
+line-height:1.6;
+max-height:70px;
+overflow:hidden;
+}
+
+/* Sections */
 .section{
 padding:30px 5%;
 position:relative;
+}
+
+.section h2{
+margin-bottom:15px;
 }
 
 .scroll-row{
@@ -158,7 +142,9 @@ overflow-x:auto;
 scroll-behavior:smooth;
 }
 
-.scroll-row::-webkit-scrollbar{display:none}
+.scroll-row::-webkit-scrollbar{
+display:none;
+}
 
 .scroll-btn{
 position:absolute;
@@ -167,7 +153,8 @@ transform:translateY(-50%);
 background:rgba(0,0,0,.6);
 border:none;
 color:white;
-width:35px;height:35px;
+width:35px;
+height:35px;
 border-radius:50%;
 cursor:pointer;
 z-index:10;
@@ -184,27 +171,33 @@ background:var(--card);
 border-radius:10px;
 overflow:hidden;
 cursor:pointer;
+position:relative;
 display:flex;
 flex-direction:column;
-position:relative;
 }
 
 .card img{
 width:100%;
 height:240px;
 object-fit:cover;
+flex-shrink:0;
 }
 
 .card-title{
-padding:10px;
+padding:10px 8px 12px 8px;
 font-size:13px;
 text-align:center;
 line-height:1.4em;
+height:2.8em;
 display:-webkit-box;
--webkit-line-clamp:3;
+-webkit-line-clamp:2;
 -webkit-box-orient:vertical;
 overflow:hidden;
-min-height:4.2em;
+}
+
+.progress-bar{
+height:4px;
+background:var(--red);
 }
 
 .badge{
@@ -217,15 +210,14 @@ font-size:11px;
 border-radius:20px;
 }
 
-.progress-bar{
-height:4px;
-background:var(--red);
+/* DETAILS */
+.details{
+display:none;
+padding:30px 5%;
 }
 
-/* DETAILS */
-.details{display:none;padding:30px 5%}
-
 .video-wrap{
+position:relative;
 max-width:900px;
 margin:auto;
 }
@@ -270,14 +262,6 @@ font-weight:600;
 
 <body>
 
-<!-- PLATFORM PAGE -->
-<div id="platformPage">
-<div class="platform-container">
-<h1>Pilih Platform</h1>
-<div class="platform-list" id="platformList"></div>
-</div>
-</div>
-
 <header>
 <div class="logo-wrap">
 <img src="https://i.imgur.com/MC7KXb2.png">
@@ -315,44 +299,7 @@ font-weight:600;
 
 <script>
 
-/* =========================
-   MULTI PLATFORM CONFIG
-========================= */
-
 const API="/api/proxy";
-
-const PLATFORMS={
-dramabox:{name:"DramaBox",base:"/dramabox/api/v1"},
-netshort:{name:"NetShort",base:"/netshort/api/v1"},
-reelshort:{name:"ReelShort",base:"/reelshort/api/v1"}
-};
-
-let currentPlatform=null;
-
-/* =========================
-   PLATFORM SELECT
-========================= */
-
-function renderPlatforms(){
-const list=document.getElementById("platformList");
-list.innerHTML="";
-Object.keys(PLATFORMS).forEach(key=>{
-const card=document.createElement("div");
-card.className="platform-card";
-card.textContent=PLATFORMS[key].name;
-card.onclick=()=>{
-currentPlatform=PLATFORMS[key];
-document.getElementById("platformPage").style.display="none";
-loadAll();
-};
-list.appendChild(card);
-});
-}
-
-/* =========================
-   ENGINE (UNCHANGED CORE)
-========================= */
-
 let heroList=[],heroIndex=0,heroTimer;
 let currentDrama=null,currentEpisode=0,totalEpisodes=0,currentCover="";
 
@@ -362,18 +309,19 @@ document.getElementById("detailsPage").style.display=page==="details"?"block":"n
 }
 
 async function apiCall(endpoint){
-const full=`https://captain.sapimu.au${currentPlatform.base}${endpoint}?lang=in`;
-const r=await fetch(`${API}?url=${encodeURIComponent(full)}`);
+const r=await fetch(`${API}?url=${encodeURIComponent("https://captain.sapimu.au"+endpoint+"?lang=in")}`);
 return r.json();
 }
 
 async function updateHero(){
 const item=heroList[heroIndex];
 document.getElementById("heroTitle").textContent=item.bookName;
+document.getElementById("heroDesc").textContent=item.introduction;
 document.getElementById("heroBtn").onclick=()=>openDetails(item.bookId,0,0,item.cover);
 
 const heroVideo=document.getElementById("heroVideo");
-const watch=await apiCall(`/watch/${item.bookId}/0`);
+const watch=await apiCall(`/dramabox/api/v1/watch/${item.bookId}/0`);
+
 if(watch?.data?.videoUrl){
 heroVideo.src=watch.data.videoUrl;
 heroVideo.play().catch(()=>{});
@@ -388,19 +336,58 @@ updateHero();
 },8000);
 }
 
-async function loadAll(){
-const terbaru=await apiCall("/new/1?pageSize=20");
-heroList=terbaru.data.list.slice(0,5);
-startHero();
-createSection("Terbaru",terbaru.data.list);
+function getContinue(){
+return JSON.parse(localStorage.getItem("continueWatching")||"[]");
+}
+
+function saveContinue(data){
+let list=getContinue().filter(x=>x.bookId!==data.bookId);
+list.unshift(data);
+localStorage.setItem("continueWatching",JSON.stringify(list.slice(0,10)));
+renderContinue();
+}
+
+function renderContinue(){
+const section=document.getElementById("continueSection");
+const list=getContinue();
+if(!list.length){section.innerHTML="";return;}
+
+section.innerHTML=`
+<div class="section">
+<h2>Continue Watching</h2>
+<div class="scroll-row"></div>
+</div>
+`;
+
+const row=section.querySelector(".scroll-row");
+
+list.forEach(item=>{
+const percent=item.duration?((item.currentTime/item.duration)*100):0;
+const card=document.createElement("div");
+card.className="card";
+card.innerHTML=`
+<div class="badge">Episode ${item.episode}/${item.total}</div>
+<img src="${item.cover}">
+<div class="progress-bar" style="width:${percent}%"></div>
+<div class="card-title">${item.title}</div>
+`;
+card.onclick=()=>openDetails(item.bookId,item.episode-1,item.currentTime,item.cover);
+row.appendChild(card);
+});
 }
 
 function createSection(title,list){
 const container=document.getElementById("categoryContainer");
-container.innerHTML="";
 const sec=document.createElement("div");
 sec.className="section";
-sec.innerHTML=`<h2>${title}</h2><div class="scroll-row"></div>`;
+
+sec.innerHTML=`
+<h2>${title}</h2>
+<button class="scroll-btn scroll-left">‹</button>
+<button class="scroll-btn scroll-right">›</button>
+<div class="scroll-row"></div>
+`;
+
 const row=sec.querySelector(".scroll-row");
 
 list.forEach(item=>{
@@ -414,41 +401,110 @@ card.innerHTML=`
 card.onclick=()=>openDetails(item.bookId,0,0,item.cover);
 row.appendChild(card);
 });
+
+sec.querySelector(".scroll-left").onclick=()=>row.scrollBy({left:-300,behavior:"smooth"});
+sec.querySelector(".scroll-right").onclick=()=>row.scrollBy({left:300,behavior:"smooth"});
+
 container.appendChild(sec);
 }
 
-async function openDetails(id){
+async function loadAll(){
+const container=document.getElementById("categoryContainer");
+container.innerHTML="";
+
+const terbaru=await apiCall("/dramabox/api/v1/new/1?pageSize=20");
+const hot=await apiCall("/dramabox/api/v1/rank/1?pageSize=20");
+const must=await apiCall("/dramabox/api/v1/classify?pageSize=20&sort=1");
+
+heroList=terbaru.data.list.slice(0,5);
+startHero();
+
+createSection("Terbaru",terbaru.data.list);
+createSection("Paling Hangat",hot.data.list);
+createSection("Mesti Tonton",must.data.list);
+
+renderContinue();
+}
+
+async function openDetails(id,ep=0,savedTime=0,cover=""){
 showPage("details");
-const chapters=await apiCall(`/chapters/${id}`);
+
+currentDrama=id;
+currentEpisode=ep;
+currentCover=cover;
+
+document.getElementById("autoplayToggle").checked=true;
+
+const chapters=await apiCall(`/dramabox/api/v1/chapters/${id}`);
 totalEpisodes=chapters.data.chapterList.length;
+
 const wrap=document.getElementById("episodes");
 wrap.innerHTML="";
+
 chapters.data.chapterList.forEach(ch=>{
 const btn=document.createElement("div");
 btn.className="ep-btn";
 btn.textContent=ch.chapterIndex+1;
-btn.onclick=()=>playEpisode(id,ch.chapterIndex);
+btn.dataset.index=ch.chapterIndex;
+btn.onclick=()=>playEpisode(ch.chapterIndex,0);
 wrap.appendChild(btn);
 });
-playEpisode(id,0);
+
+playEpisode(ep,savedTime);
 }
 
-async function playEpisode(id,index){
-const watch=await apiCall(`/watch/${id}/${index}`);
+async function playEpisode(index,savedTime=0){
+currentEpisode=index;
+
+const watch=await apiCall(`/dramabox/api/v1/watch/${currentDrama}/${index}`);
 const player=document.getElementById("player");
+
 player.src=watch.data.videoUrl;
+
+player.onloadedmetadata=()=>{
+if(savedTime>0) player.currentTime=savedTime;
+};
+
 player.play();
+
+document.querySelectorAll(".ep-btn").forEach(btn=>btn.classList.remove("playing"));
+
+const active=document.querySelector(`.ep-btn[data-index="${index}"]`);
+if(active) active.classList.add("playing");
+
+player.onended=()=>{
+if(document.getElementById("autoplayToggle").checked && index+1<totalEpisodes){
+playEpisode(index+1,0);
+}
+};
+
+player.ontimeupdate=()=>{
+if(player.duration){
+saveContinue({
+bookId:currentDrama,
+episode:index+1,
+currentTime:player.currentTime,
+duration:player.duration,
+total:totalEpisodes,
+cover:currentCover,
+title:watch.data.bookName
+});
+}
+};
 }
 
 function goHome(){
-document.getElementById("player").pause();
+const player=document.getElementById("player");
+player.pause();
+player.src="";
 showPage("home");
 }
 
-function logout(){location.reload();}
+function logout(){
+location.reload();
+}
 
-/* START */
-renderPlatforms();
+loadAll();
 showPage("home");
 
 </script>
